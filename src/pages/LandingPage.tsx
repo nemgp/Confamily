@@ -23,7 +23,7 @@ export function LandingPage() {
       {/* Navbar */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(250,247,242,0.8)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border-light)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="avatar" style={{ width: '36px', height: '36px', fontSize: '0.9rem' }}>C</div>
+          <img src="/Confamily/logo.png" alt="Confamily Logo" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }} />
           <span style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--text)' }}>Confamily</span>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

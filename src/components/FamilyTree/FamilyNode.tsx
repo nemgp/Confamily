@@ -25,8 +25,8 @@ export function FamilyNode({ data }: { data: FamilyMember }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
         <img 
           src={data.photoUrl || (data.gender === 'F' 
-            ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Jocelyn&backgroundColor=ffdfbf' 
-            : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4')} 
+            ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Maria&mouth=smile&hair=longHairStraight&backgroundColor=ffdfbf' 
+            : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Robert&mouth=smile&facialHair=beardLight&backgroundColor=b6e3f4')} 
           alt={data.firstName} 
           style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: isMe ? '2px solid #fff' : `2px solid ${genderColor}`, background: '#fff' }} 
         />

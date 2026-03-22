@@ -35,7 +35,9 @@ function Sidebar() {
 
   return (
     <nav className="sidebar">
-      <Link to="/dashboard" className="sidebar-logo">C</Link>
+      <Link to="/dashboard" className="sidebar-logo" style={{ background: 'transparent', padding: 0 }}>
+        <img src="/Confamily/logo.png" alt="Confamily" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+      </Link>
       {links.map(l => (
         <Link key={l.to} to={l.to} className={`sidebar-link ${path === l.to ? 'active' : ''}`} title={l.label}>
           <l.icon size={22} />
