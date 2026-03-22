@@ -68,6 +68,12 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+const getAvatarUrl = (gender?: 'M' | 'F', photoUrl?: string) => {
+  return photoUrl || (gender === 'F' 
+    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Maria&mouth=smile&hair=longHairStraight&backgroundColor=ffdfbf' 
+    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Robert&mouth=smile&facialHair=beardLight&backgroundColor=b6e3f4');
+};
+
 function ListView() {
   const { nodes, selectMember } = useFamilyStore();
   return (
@@ -76,7 +82,7 @@ function ListView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {nodes.map(n => (
           <div key={n.id} className="card" onClick={() => selectMember(n.id)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', cursor: 'pointer' }}>
-            <div className="avatar">{n.data.firstName.charAt(0)}</div>
+            <img src={getAvatarUrl(n.data.gender, n.data.photoUrl)} alt={n.data.firstName} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>{n.data.firstName} {n.data.lastName}</div>
               <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -101,7 +107,7 @@ function GridView() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
         {nodes.map(n => (
           <div key={n.id} className="card" onClick={() => selectMember(n.id)} style={{ textAlign: 'center', cursor: 'pointer', padding: '24px 16px' }}>
-            <div className="avatar avatar-lg" style={{ margin: '0 auto 12px' }}>{n.data.firstName.charAt(0)}</div>
+            <img src={getAvatarUrl(n.data.gender, n.data.photoUrl)} alt={n.data.firstName} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 12px' }} />
             <div style={{ fontWeight: 700, marginBottom: '4px' }}>{n.data.firstName}</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{n.data.lastName}</div>
             <span className="badge badge-primary">{n.data.relation}</span>
