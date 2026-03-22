@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Phone, Video, Search, Users as UsersIcon } from 'lucide-react';
 
-type Contact = { id: string; name: string; online?: boolean; isGroup?: boolean; lastMessage?: string };
+type Contact = { id: string; name: string; online?: boolean; isGroup?: boolean; lastMessage?: string; gender?: 'M' | 'F'; photoUrl?: string };
 type Message = { id: string; from: string; content: string; time: string; mine: boolean };
 
 const MOCK_CONTACTS: Contact[] = [
-  { id: '2', name: 'Papa', online: true, lastMessage: 'Bonjour fils !' },
-  { id: '3', name: 'Maman', online: false, lastMessage: 'Appelle-moi ce soir' },
+  { id: '2', name: 'Papa', online: true, lastMessage: 'Bonjour fils !', gender: 'M' },
+  { id: '3', name: 'Maman', online: false, lastMessage: 'Appelle-moi ce soir', gender: 'F' },
   { id: 'g1', name: 'Descendants de Grand-Père', isGroup: true, lastMessage: '3 nouveaux messages' }
 ];
+
+const getAvatarUrl = (gender?: 'M' | 'F', photoUrl?: string) => {
+  return photoUrl || (gender === 'F' 
+    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Maria&mouth=smile&hair=longHairStraight&backgroundColor=ffdfbf' 
+    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Robert&mouth=smile&facialHair=beardLight&backgroundColor=b6e3f4');
+};
 
 const MOCK_MESSAGES: Record<string, Message[]> = {
   '2': [
@@ -52,8 +58,8 @@ export function MessagesView() {
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
       {/* Contacts Panel */}
-      <div style={{ width: '320px', borderRight: '1px solid var(--border-light)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-light)' }}>
+      <div style={{ width: '320px', borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '12px' }}>Messages</h2>
           <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg)', padding: '10px 16px', borderRadius: 'var(--radius-full)', gap: '8px' }}>
             <Search size={16} color="var(--text-muted)" />
@@ -68,9 +74,13 @@ export function MessagesView() {
               borderLeft: selected.id === c.id ? '3px solid var(--primary)' : '3px solid transparent',
               transition: 'var(--transition)'
             }}>
-              <div className="avatar" style={{ background: c.isGroup ? 'linear-gradient(135deg, var(--secondary), var(--accent))' : undefined }}>
-                {c.isGroup ? <UsersIcon size={18} /> : c.name.charAt(0)}
-              </div>
+              {c.isGroup ? (
+                <div className="avatar" style={{ background: 'linear-gradient(135deg, var(--secondary), var(--accent))' }}>
+                  <UsersIcon size={18} />
+                </div>
+              ) : (
+                <img src={getAvatarUrl(c.gender, c.photoUrl)} alt={c.name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{c.name}</div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -86,9 +96,15 @@ export function MessagesView() {
       {/* Chat Area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
         {/* Chat Header */}
-        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="avatar avatar-sm">{selected.name.charAt(0)}</div>
+            {selected.isGroup ? (
+              <div className="avatar avatar-sm" style={{ background: 'linear-gradient(135deg, var(--secondary), var(--accent))' }}>
+                <UsersIcon size={16} />
+              </div>
+            ) : (
+              <img src={getAvatarUrl(selected.gender, selected.photoUrl)} alt={selected.name} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+            )}
             <div>
               <div style={{ fontWeight: 700 }}>{selected.name}</div>
               <div style={{ fontSize: '0.75rem', color: selected.online ? 'var(--success)' : 'var(--text-muted)' }}>{selected.isGroup ? 'Groupe de branche' : (selected.online ? 'En ligne' : 'Hors ligne')}</div>
@@ -120,7 +136,7 @@ export function MessagesView() {
         </div>
 
         {/* Input */}
-        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderTop: '1px solid var(--border-light)' }}>
+        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg)', padding: '8px 8px 8px 20px', borderRadius: 'var(--radius-full)', gap: '8px' }}>
             <input type="text" placeholder="Écrivez votre message..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.95rem', color: 'var(--text)' }} />
             <button className="btn btn-primary btn-icon" onClick={send} style={{ width: '40px', height: '40px' }}><Send size={16} /></button>
