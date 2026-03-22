@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useFamilyStore, Relation } from '../../store/familyStore';
-import { X, MessageCircle, UserPlus, MapPin, Briefcase, Calendar, Edit3, Save, Trash2 } from 'lucide-react';
+import { X, MessageCircle, UserPlus, MapPin, Briefcase, Calendar, Edit3, Save, Trash2, Camera } from 'lucide-react';
 
 const relationLabels: Record<Relation, string> = {
   moi: 'Vous', parent: 'Parent', enfant: 'Enfant', conjoint: 'Conjoint(e)',
@@ -11,6 +11,7 @@ export function MemberDetails() {
   const { selectedMember, selectMember, openAddModal, updateMember, removeMember } = useFamilyStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
+  const photoRef = useRef<HTMLInputElement>(null);
 
   if (!selectedMember) return null;
 
@@ -49,8 +50,23 @@ export function MemberDetails() {
 
       {/* Avatar + Name */}
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <div className="avatar avatar-xl" style={{ margin: '0 auto 12px' }}>
-          {selectedMember.photoUrl ? <img src={selectedMember.photoUrl} alt="" /> : selectedMember.firstName.charAt(0)}
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <div className="avatar avatar-xl" style={{ margin: '0 auto 12px', cursor: editing ? 'pointer' : 'default' }}
+            onClick={() => editing && photoRef.current?.click()}>
+            {selectedMember.photoUrl ? <img src={selectedMember.photoUrl} alt="" /> : selectedMember.firstName.charAt(0)}
+          </div>
+          {editing && (
+            <div onClick={() => photoRef.current?.click()} style={{ position: 'absolute', bottom: '8px', right: '-4px', width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}>
+              <Camera size={14} color="#fff" />
+            </div>
+          )}
+          <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = () => updateMember(selectedMember.id, { photoUrl: reader.result as string });
+            reader.readAsDataURL(file);
+          }} />
         </div>
         {editing ? (
           <div style={{ display: 'flex', gap: '8px' }}>

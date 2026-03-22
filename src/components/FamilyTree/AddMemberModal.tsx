@@ -1,31 +1,64 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useFamilyStore, Relation } from '../../store/familyStore';
-import { X, UserPlus } from 'lucide-react';
+import { X, UserPlus, Camera } from 'lucide-react';
 
-const relationLabels: Record<Relation, string> = {
+const relationLabels: Record<string, string> = {
   moi: 'Moi', parent: 'Parent', enfant: 'Enfant', conjoint: 'Conjoint(e)',
   frere_soeur: 'Frère/Sœur', grand_parent: 'Grand-Parent', oncle_tante: 'Oncle/Tante', cousin: 'Cousin(e)'
 };
 
 export function AddMemberModal() {
-  const { showAddModal, addRelationType, closeAddModal, addMember, selectedMember } = useFamilyStore();
+  const { showAddModal, addRelationType, closeAddModal, addMember, selectedMember, getParentsOf } = useFamilyStore();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [location, setLocation] = useState('');
   const [profession, setProfession] = useState('');
   const [gender, setGender] = useState<'M' | 'F'>('M');
+  const [photoUrl, setPhotoUrl] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   if (!showAddModal || !addRelationType) return null;
+
+  // Validation: max 2 parents
+  const refId = selectedMember?.id || '1';
+  if (addRelationType === 'parent') {
+    const existingParents = getParentsOf(refId);
+    if (existingParents.length >= 2) {
+      return (
+        <div className="modal-overlay" onClick={closeAddModal}>
+          <div className="modal animate-slide" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>⚠️ Maximum atteint</h2>
+              <button className="btn btn-icon btn-ghost" onClick={closeAddModal}><X size={20} /></button>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              Ce membre a déjà 2 parents. Vous ne pouvez pas en ajouter davantage.
+            </p>
+            <button className="btn btn-primary btn-block" onClick={closeAddModal} style={{ marginTop: '16px' }}>Compris</button>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setPhotoUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const id = 'member_' + Date.now();
     addMember(
-      { id, firstName, lastName, birthDate, location, profession, relation: addRelationType, gender, isAlive: true },
-      selectedMember?.id || '1'
+      { id, firstName, lastName, birthDate, location, profession, relation: addRelationType, gender, isAlive: true, photoUrl: photoUrl || undefined },
+      refId,
+      addRelationType
     );
-    setFirstName(''); setLastName(''); setBirthDate(''); setLocation(''); setProfession('');
+    setFirstName(''); setLastName(''); setBirthDate(''); setLocation(''); setProfession(''); setPhotoUrl('');
   };
 
   return (
@@ -36,6 +69,19 @@ export function AddMemberModal() {
           <button className="btn btn-icon btn-ghost" onClick={closeAddModal}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Photo */}
+          <div style={{ textAlign: 'center' }}>
+            <div onClick={() => fileRef.current?.click()} style={{ width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto', cursor: 'pointer', overflow: 'hidden', background: photoUrl ? 'transparent' : 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px dashed var(--border)', transition: 'var(--transition)' }}>
+              {photoUrl ? (
+                <img src={photoUrl} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Camera size={28} color="var(--primary)" />
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} />
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>Cliquez pour ajouter une photo</p>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="input-group">
               <label>Prénom</label>
