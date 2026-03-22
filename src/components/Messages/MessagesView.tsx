@@ -37,6 +37,7 @@ export function MessagesView() {
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES['2']);
   const [input, setInput] = useState('');
   const [search, setSearch] = useState('');
+  const [mobileShowChat, setMobileShowChat] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
@@ -44,6 +45,7 @@ export function MessagesView() {
   const selectContact = (c: Contact) => {
     setSelected(c);
     setMessages(MOCK_MESSAGES[c.id] || []);
+    setMobileShowChat(true);
   };
 
   const send = () => {
@@ -58,7 +60,7 @@ export function MessagesView() {
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
       {/* Contacts Panel */}
-      <div style={{ width: '320px', borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
+      <div className={`messages-sidebar ${mobileShowChat ? 'hide-mobile' : ''}`} style={{ width: '300px', borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '12px' }}>Messages</h2>
           <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg)', padding: '10px 16px', borderRadius: 'var(--radius-full)', gap: '8px' }}>
@@ -94,10 +96,13 @@ export function MessagesView() {
       </div>
 
       {/* Chat Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+      <div className={`chat-area ${!mobileShowChat ? 'hide-mobile' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
         {/* Chat Header */}
         <div style={{ padding: '16px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="btn btn-icon btn-ghost show-mobile" onClick={() => setMobileShowChat(false)} style={{ marginRight: -4 }}>
+              <Search size={20} style={{ transform: 'rotate(90deg)' }} /> {/* Using search as back icon arrow substitute if Chevron not imported */}
+            </button>
             {selected.isGroup ? (
               <div className="avatar avatar-sm" style={{ background: 'linear-gradient(135deg, var(--secondary), var(--accent))' }}>
                 <UsersIcon size={16} />

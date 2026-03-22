@@ -33,8 +33,8 @@ export function MemberDetails() {
   ];
 
   return (
-    <div className="animate-slide" style={{
-      position: 'absolute', right: 0, top: 0, width: '360px', height: '100%',
+    <div className="animate-slide member-details-drawer" style={{
+      position: 'absolute', right: 0, top: 0, height: '100%',
       background: 'var(--surface)', borderLeft: '1px solid var(--border-light)',
       padding: '24px', boxShadow: '-4px 0 20px rgba(0,0,0,0.06)', zIndex: 10,
       display: 'flex', flexDirection: 'column', overflow: 'auto'
@@ -42,9 +42,9 @@ export function MemberDetails() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <span className="badge badge-primary">{relationLabels[selectedMember.relation]}</span>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {!editing && <button className="btn btn-icon btn-ghost" onClick={startEdit}><Edit3 size={18} /></button>}
-          <button className="btn btn-icon btn-ghost" onClick={() => selectMember(null)}><X size={18} /></button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {!editing && <button className="btn btn-icon btn-ghost mobile-large-btn" onClick={startEdit}><Edit3 size={22} /></button>}
+          <button className="btn btn-icon btn-ghost mobile-large-btn" onClick={() => selectMember(null)}><X size={22} /></button>
         </div>
       </div>
 

@@ -52,6 +52,8 @@ interface FamilyState {
   openAddModal: (relationType: Relation) => void;
   closeAddModal: () => void;
   getParentsOf: (id: string) => string[];
+  edgeCustomColors: Record<string, string>;
+  cycleEdgeColor: (edgeId: string) => void;
 }
 
 const EDGE_STYLE_VERTICAL = { stroke: '#d97736', strokeWidth: 2 };
@@ -61,7 +63,9 @@ const NODE_H = 80;
 const H_GAP = 60;
 const V_GAP = 140;
 
-function layoutTree(nodes: TreeNode[], relations: RelationLink[]): { nodes: TreeNode[], edges: TreeEdge[] } {
+const COLORS = ['#d97736', '#3498db', '#e74c3c', '#27ae60', '#9b59b6', '#8c5b3b'];
+
+function layoutTree(nodes: TreeNode[], relations: RelationLink[], customColors: Record<string, string> = {}): { nodes: TreeNode[], edges: TreeEdge[] } {
   if (nodes.length === 0) return { nodes: [], edges: [] };
 
   // Build adjacency maps
@@ -195,23 +199,25 @@ function layoutTree(nodes: TreeNode[], relations: RelationLink[]): { nodes: Tree
 
   // Parent → Child edges (vertical)
   parentChildLinks.forEach(r => {
+    const edgeId = `e-${r.fromId}-${r.toId}`;
     edges.push({
-      id: `e-${r.fromId}-${r.toId}`,
+      id: edgeId,
       source: r.fromId,
       target: r.toId,
       type: 'smoothstep',
-      style: EDGE_STYLE_VERTICAL,
+      style: { ...EDGE_STYLE_VERTICAL, stroke: customColors[edgeId] || EDGE_STYLE_VERTICAL.stroke },
     });
   });
 
   // Spouse edges (horizontal, using a step type)
   spouseLinks.forEach(r => {
+    const edgeId = `e-spouse-${r.fromId}-${r.toId}`;
     edges.push({
-      id: `e-spouse-${r.fromId}-${r.toId}`,
+      id: edgeId,
       source: r.fromId,
       target: r.toId,
       type: 'straight',
-      style: EDGE_STYLE_HORIZONTAL,
+      style: { ...EDGE_STYLE_HORIZONTAL, stroke: customColors[edgeId] || EDGE_STYLE_HORIZONTAL.stroke },
     });
   });
 
@@ -315,7 +321,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     }
 
     const allNodes = [...state.nodes, newNode];
-    const result = layoutTree(allNodes, newRelations);
+    const result = layoutTree(allNodes, newRelations, state.edgeCustomColors);
     return { nodes: result.nodes, edges: result.edges, relations: newRelations, showAddModal: false };
   }),
 
@@ -327,7 +333,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
   removeMember: (id) => set((state) => {
     const newRelations = state.relations.filter(r => r.fromId !== id && r.toId !== id);
     const newNodes = state.nodes.filter(n => n.id !== id);
-    const result = layoutTree(newNodes, newRelations);
+    const result = layoutTree(newNodes, newRelations, state.edgeCustomColors);
     return {
       nodes: result.nodes,
       edges: result.edges,
@@ -336,6 +342,20 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     };
   }),
 
-  openAddModal: (relationType) => set({ showAddModal: true, addRelationType: relationType }),
+  openAddModal: (relationType: Relation) => set({ showAddModal: true, addRelationType: relationType }),
   closeAddModal: () => set({ showAddModal: false, addRelationType: null }),
+  edgeCustomColors: {},
+  cycleEdgeColor: (edgeId: string) => set((state) => {
+    const currentColor = state.edgeCustomColors[edgeId] || (edgeId.includes('spouse') ? EDGE_STYLE_HORIZONTAL.stroke : EDGE_STYLE_VERTICAL.stroke);
+    const currentIndex = COLORS.indexOf(currentColor as string);
+    const nextColor = COLORS[(currentIndex + 1) % COLORS.length];
+    
+    const newCustomColors = { ...state.edgeCustomColors, [edgeId]: nextColor };
+    const result = layoutTree(state.nodes, state.relations, newCustomColors);
+    return { 
+      edgeCustomColors: newCustomColors,
+      nodes: result.nodes,
+      edges: result.edges
+    };
+  }),
 }));

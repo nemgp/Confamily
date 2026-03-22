@@ -39,8 +39,8 @@ export function PrintTree() {
 
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
-      <button className="btn btn-outline btn-sm" onClick={handleExport}>
-        <Download size={14} /> {isPremium ? 'Exporter HD' : '🔒 Export HD'}
+      <button className="btn btn-outline btn-xs" onClick={handleExport}>
+        <Download size={14} /> {isPremium ? 'Export HD' : '🔒 Export HD'}
       </button>
       <button className="btn btn-ghost btn-sm" onClick={() => window.print()}>
         <Printer size={14} /> Imprimer

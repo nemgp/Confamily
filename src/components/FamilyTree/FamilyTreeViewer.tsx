@@ -6,7 +6,7 @@ import { AddMemberModal } from './AddMemberModal';
 import { useMemo } from 'react';
 
 export function FamilyTreeViewer() {
-  const { nodes, edges, selectMember } = useFamilyStore();
+  const { nodes, edges, selectMember, cycleEdgeColor } = useFamilyStore();
   const nodeTypes = useMemo(() => ({ familyNode: FamilyNode }), []);
 
   return (
@@ -16,6 +16,7 @@ export function FamilyTreeViewer() {
         edges={edges}
         nodeTypes={nodeTypes}
         onNodeClick={(_: unknown, node: { id: string }) => selectMember(node.id)}
+        onEdgeClick={(_: unknown, edge: { id: string }) => cycleEdgeColor(edge.id)}
         fitView
         minZoom={0.2}
         maxZoom={2}

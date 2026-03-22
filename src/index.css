@@ -82,6 +82,7 @@ img { max-width: 100%; display: block; }
 .btn-ghost:hover { color: var(--primary); background: var(--primary-light); }
 .btn-lg { padding: 18px 36px; font-size: 1.1rem; }
 .btn-sm { padding: 10px 20px; font-size: 0.9rem; }
+.btn-xs { padding: 6px 12px; font-size: 0.8rem; gap: 4px; }
 .btn-icon { width: 44px; height: 44px; padding: 0; border-radius: var(--radius-full); }
 .btn-block { width: 100%; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
@@ -177,13 +178,16 @@ img { max-width: 100%; display: block; }
 .animate-slide { animation: slideUp 0.5s ease; }
 .animate-float { animation: float 4s ease-in-out infinite; }
 
-/* ===== RESPONSIVE ===== */
+.hide-mobile { display: flex !important; }
+.show-mobile { display: none !important; }
+
 @media (max-width: 768px) {
   :root { --sidebar-width: 60px; }
   .btn { padding: 12px 20px; font-size: 0.95rem; }
   .btn-lg { padding: 14px 28px; font-size: 1rem; }
   .modal { padding: 24px; width: 95%; }
   .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
 }
 
 @media (max-width: 480px) {
@@ -194,6 +198,8 @@ img { max-width: 100%; display: block; }
   .sidebar-link { width: 40px; height: 40px; }
   .sidebar-link.active::before { display: none; }
   .main-with-sidebar { padding-bottom: 60px; }
+  .member-details-drawer { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border-light); }
+  .mobile-large-btn { width: 48px !important; height: 48px !important; }
 }
 
 /* ===== SCROLLBAR ===== */
