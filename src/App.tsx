@@ -11,11 +11,13 @@ import { SettingsPage } from './pages/SettingsPage';
 import { VaultPage } from './pages/VaultPage';
 import { PricingPage } from './pages/PricingPage';
 import { useFamilyStore } from './store/familyStore';
-import { MessageSquare, Settings, Lock, Crown, TreePine, List, LayoutGrid, MapPin, Briefcase, Calendar } from 'lucide-react';
+import { useAuthStore } from './store/authStore';
+import { MessageSquare, Settings, Lock, Crown, TreePine, List, LayoutGrid, MapPin, Briefcase, Calendar, Moon, Sun, Share2 } from 'lucide-react';
 
 function Sidebar() {
   const loc = useLocation();
   const path = loc.pathname;
+  const { darkMode, toggleDarkMode } = useAuthStore();
 
   const links = [
     { to: '/dashboard', icon: TreePine, label: 'Arbre' },
@@ -25,6 +27,12 @@ function Sidebar() {
     { to: '/settings', icon: Settings, label: 'Réglages' },
   ];
 
+  const shareWhatsApp = () => {
+    const link = window.location.origin + window.location.pathname + '#/register';
+    const msg = `🌳 Rejoins notre arbre généalogique familial sur Confamily ! Inscris-toi ici : ${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   return (
     <nav className="sidebar">
       <Link to="/dashboard" className="sidebar-logo">C</Link>
@@ -33,6 +41,16 @@ function Sidebar() {
           <l.icon size={22} />
         </Link>
       ))}
+
+      {/* Bottom shortcuts */}
+      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '16px' }}>
+        <button className="sidebar-link" title="Inviter via WhatsApp" onClick={shareWhatsApp} style={{ color: '#25D366' }}>
+          <Share2 size={22} />
+        </button>
+        <button className="sidebar-link" title={darkMode ? 'Mode clair' : 'Mode sombre'} onClick={toggleDarkMode}>
+          {darkMode ? <Sun size={22} color="#f39c12" /> : <Moon size={22} />}
+        </button>
+      </div>
     </nav>
   );
 }
