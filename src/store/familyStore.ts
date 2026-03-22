@@ -149,28 +149,38 @@ function layoutTree(nodes: TreeNode[], relations: RelationLink[]): { nodes: Tree
       }
     });
 
-    let x = 300;
+    let nextAvailableX = 100;
     // Try to center children under their parents
     groups.forEach(group => {
       // Check if any member has parents already placed
       let parentCenterX = -1;
+      let parentCount = 0;
+      
       group.forEach(id => {
         const parents = parentsOf[id] || [];
-        const placedParents = parents.filter(p => placed.has(p));
-        if (placedParents.length > 0) {
-          const avgX = placedParents.reduce((sum, p) => sum + positions[p].x, 0) / placedParents.length;
-          parentCenterX = avgX;
-        }
+        parents.forEach(p => {
+          if (placed.has(p)) {
+            parentCenterX = parentCenterX < 0 ? positions[p].x : parentCenterX + positions[p].x;
+            parentCount++;
+          }
+        });
       });
 
-      const startX = parentCenterX >= 0 ? parentCenterX - ((group.length - 1) * (NODE_W + H_GAP)) / 2 : x;
+      let startX = nextAvailableX;
+      
+      if (parentCount > 0) {
+        parentCenterX = parentCenterX / parentCount;
+        const desiredStartX = parentCenterX - ((group.length - 1) * (NODE_W + H_GAP)) / 2;
+        // Eviter la superposition en forçant startX >= nextAvailableX
+        startX = Math.max(nextAvailableX, desiredStartX);
+      }
 
       group.forEach((id, i) => {
         positions[id] = { x: startX + i * (NODE_W + H_GAP), y };
         placed.add(id);
       });
 
-      x = startX + group.length * (NODE_W + H_GAP) + H_GAP;
+      nextAvailableX = startX + group.length * (NODE_W + H_GAP) + H_GAP;
     });
   });
 
