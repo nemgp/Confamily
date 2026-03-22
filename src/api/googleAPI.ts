@@ -1,6 +1,6 @@
 // Google Apps Script API Client
 // Replace this URL with your deployed Google Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwRoYQxuPXF3kN9FyxY8CrUI9phfRNjZa35iFGm_HnD-fBCgrZcbAzAGjE5nqbMD5AncA/exec';
 
 async function request(action: string, data?: Record<string, unknown>) {
   try {
