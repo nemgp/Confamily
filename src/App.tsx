@@ -1,72 +1,92 @@
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { FamilyTreeViewer } from './components/FamilyTree/FamilyTreeViewer';
 import { MemberDetails } from './components/FamilyTree/MemberDetails';
+import { PrintTree } from './components/FamilyTree/PrintTree';
 import { MessagesView } from './components/Messages/MessagesView';
 import { OnboardingView } from './components/Onboarding/OnboardingView';
-import { MessageSquare, Users, Settings } from 'lucide-react';
+import { LandingPage } from './pages/LandingPage';
+import { LoginPage, RegisterPage } from './pages/LoginPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { VaultPage } from './pages/VaultPage';
+import { PricingPage } from './pages/PricingPage';
+import { MessageSquare, Users, Settings, Lock, Crown, TreePine } from 'lucide-react';
 
-function Dashboard() {
+function Sidebar() {
+  const loc = useLocation();
+  const path = loc.pathname;
+
+  const links = [
+    { to: '/dashboard', icon: TreePine, label: 'Arbre' },
+    { to: '/messages', icon: MessageSquare, label: 'Messages' },
+    { to: '/vault', icon: Lock, label: 'Coffre' },
+    { to: '/pricing', icon: Crown, label: 'Premium' },
+    { to: '/settings', icon: Settings, label: 'Réglages' },
+  ];
+
+  return (
+    <nav className="sidebar">
+      <Link to="/dashboard" className="sidebar-logo">C</Link>
+      {links.map(l => (
+        <Link key={l.to} to={l.to} className={`sidebar-link ${path === l.to ? 'active' : ''}`} title={l.label}>
+          <l.icon size={22} />
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      {/* Sidebar Navigation */}
-      <nav style={{
-        width: '80px',
-        background: 'var(--surface-color)',
-        borderRight: '1px solid var(--border-color)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '2rem 0',
-        gap: '2rem'
-      }}>
-        <div style={{ 
-          width: '40px', 
-          height: '40px', 
-          borderRadius: '20px', 
-          background: 'var(--primary-color)',
-          color: 'white',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          marginBottom: '2rem'
-        }}>
-          C
-        </div>
-        
-        <Link to="/dashboard" style={{ color: 'var(--primary-color)' }}>
-          <Users size={28} />
-        </Link>
-        <Link to="/messages" style={{ color: 'var(--text-muted)' }}>
-          <MessageSquare size={28} />
-        </Link>
-        <div style={{ marginTop: 'auto' }}>
-          <Settings size={28} color="var(--text-muted)" />
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main style={{ flex: 1, position: 'relative' }}>
-        <FamilyTreeViewer />
-        <MemberDetails />
+      <Sidebar />
+      <main style={{ flex: 1, position: 'relative', overflow: 'auto' }} className="main-with-sidebar">
+        {children}
       </main>
     </div>
   );
 }
 
-function MessagesLayout() {
+function DashboardPage() {
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      <nav style={{ width: '80px', background: 'var(--surface-color)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 0', gap: '2rem' }}>
-        <div style={{ width: '40px', height: '40px', borderRadius: '20px', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', marginBottom: '2rem' }}>C</div>
-        <Link to="/dashboard" style={{ color: 'var(--text-muted)' }}><Users size={28} /></Link>
-        <Link to="/messages" style={{ color: 'var(--primary-color)' }}><MessageSquare size={28} /></Link>
-        <div style={{ marginTop: 'auto' }}><Settings size={28} color="var(--text-muted)" /></div>
-      </nav>
-      <main style={{ flex: 1, position: 'relative' }}>
-        <MessagesView />
-      </main>
-    </div>
+    <AppLayout>
+      <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 5 }}>
+        <PrintTree />
+      </div>
+      <FamilyTreeViewer />
+      <MemberDetails />
+    </AppLayout>
+  );
+}
+
+function MessagesPage() {
+  return (
+    <AppLayout>
+      <MessagesView />
+    </AppLayout>
+  );
+}
+
+function VaultPageWrapper() {
+  return (
+    <AppLayout>
+      <VaultPage />
+    </AppLayout>
+  );
+}
+
+function PricingPageWrapper() {
+  return (
+    <AppLayout>
+      <PricingPage />
+    </AppLayout>
+  );
+}
+
+function SettingsPageWrapper() {
+  return (
+    <AppLayout>
+      <SettingsPage />
+    </AppLayout>
   );
 }
 
@@ -74,9 +94,15 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<OnboardingView />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/messages" element={<MessagesLayout />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/onboarding" element={<OnboardingView />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/vault" element={<VaultPageWrapper />} />
+        <Route path="/pricing" element={<PricingPageWrapper />} />
+        <Route path="/settings" element={<SettingsPageWrapper />} />
       </Routes>
     </HashRouter>
   );

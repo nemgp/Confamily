@@ -1,79 +1,109 @@
-import { useFamilyStore } from '../../store/familyStore';
-import { X, MessageCircle, UserPlus, Info } from 'lucide-react';
+import { useState } from 'react';
+import { useFamilyStore, Relation } from '../../store/familyStore';
+import { X, MessageCircle, UserPlus, MapPin, Briefcase, Calendar, Edit3, Save, Trash2 } from 'lucide-react';
+
+const relationLabels: Record<Relation, string> = {
+  moi: 'Vous', parent: 'Parent', enfant: 'Enfant', conjoint: 'Conjoint(e)',
+  frere_soeur: 'Frère/Sœur', grand_parent: 'Grand-Parent', oncle_tante: 'Oncle/Tante', cousin: 'Cousin(e)'
+};
 
 export function MemberDetails() {
-  const { selectedMember, selectMember } = useFamilyStore();
+  const { selectedMember, selectMember, openAddModal, updateMember, removeMember } = useFamilyStore();
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
 
   if (!selectedMember) return null;
 
+  const startEdit = () => {
+    setForm({ firstName: selectedMember.firstName, lastName: selectedMember.lastName, birthDate: selectedMember.birthDate || '', location: selectedMember.location || '', profession: selectedMember.profession || '' });
+    setEditing(true);
+  };
+
+  const saveEdit = () => {
+    updateMember(selectedMember.id, form);
+    setEditing(false);
+  };
+
+  const addOptions: { label: string; rel: Relation }[] = [
+    { label: 'Enfant', rel: 'enfant' },
+    { label: 'Conjoint(e)', rel: 'conjoint' },
+    { label: 'Frère/Sœur', rel: 'frere_soeur' },
+    { label: 'Parent', rel: 'parent' },
+  ];
+
   return (
-    <div style={{
-      position: 'absolute',
-      right: 0,
-      top: 0,
-      width: '350px',
-      height: '100%',
-      background: 'var(--surface-color)',
-      borderLeft: '1px solid var(--border-color)',
-      padding: '2rem',
-      boxShadow: '-4px 0 15px rgba(0,0,0,0.05)',
-      zIndex: 10,
-      display: 'flex',
-      flexDirection: 'column'
+    <div className="animate-slide" style={{
+      position: 'absolute', right: 0, top: 0, width: '360px', height: '100%',
+      background: 'var(--surface)', borderLeft: '1px solid var(--border-light)',
+      padding: '24px', boxShadow: '-4px 0 20px rgba(0,0,0,0.06)', zIndex: 10,
+      display: 'flex', flexDirection: 'column', overflow: 'auto'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Info size={24} color="var(--primary-color)" />
-          {selectedMember.firstName}
-        </h2>
-        <button 
-          onClick={() => selectMember(null)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}
-        ><X size={24} color="var(--text-muted)" /></button>
-      </div>
-      
-      <h3 style={{ marginTop: '0.5rem', color: 'var(--text-muted)' }}>{selectedMember.lastName}</h3>
-      
-      <div style={{ margin: '1rem 0', padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
-        <p style={{ margin: '0.5rem 0' }}><strong>Relation :</strong> {selectedMember.relation}</p>
-        <p style={{ margin: '0.5rem 0' }}><strong>Date de naissance:</strong> {selectedMember.birthDate || 'Non renseignée'}</p>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <span className="badge badge-primary">{relationLabels[selectedMember.relation]}</span>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          {!editing && <button className="btn btn-icon btn-ghost" onClick={startEdit}><Edit3 size={18} /></button>}
+          <button className="btn btn-icon btn-ghost" onClick={() => selectMember(null)}><X size={18} /></button>
+        </div>
       </div>
 
-      <button style={{
-        marginTop: 'auto',
-        background: 'var(--primary-color)',
-        color: 'white',
-        border: 'none',
-        padding: '1rem',
-        borderRadius: 'var(--radius-md)',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        cursor: 'pointer'
-      }}>
-        <MessageCircle size={20} />
-        Démarrer une discussion
+      {/* Avatar + Name */}
+      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        <div className="avatar avatar-xl" style={{ margin: '0 auto 12px' }}>
+          {selectedMember.photoUrl ? <img src={selectedMember.photoUrl} alt="" /> : selectedMember.firstName.charAt(0)}
+        </div>
+        {editing ? (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input className="input" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} style={{ fontSize: '0.9rem' }} />
+            <input className="input" value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} style={{ fontSize: '0.9rem' }} />
+          </div>
+        ) : (
+          <>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '2px' }}>{selectedMember.firstName} {selectedMember.lastName}</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{selectedMember.gender === 'F' ? '♀' : '♂'} {selectedMember.isAlive ? 'En vie' : 'Décédé(e)'}</p>
+          </>
+        )}
+      </div>
+
+      {/* Details */}
+      <div className="card" style={{ marginBottom: '16px', padding: '16px' }}>
+        {editing ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="input-group"><label><Calendar size={14} /> Date de naissance</label><input className="input" type="date" value={form.birthDate} onChange={e => setForm({ ...form, birthDate: e.target.value })} /></div>
+            <div className="input-group"><label><MapPin size={14} /> Lieu</label><input className="input" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Ville, Pays" /></div>
+            <div className="input-group"><label><Briefcase size={14} /> Profession</label><input className="input" value={form.profession} onChange={e => setForm({ ...form, profession: e.target.value })} placeholder="Profession" /></div>
+            <button className="btn btn-primary btn-sm btn-block" onClick={saveEdit}><Save size={16} /> Sauvegarder</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}><Calendar size={16} /><span>{selectedMember.birthDate || 'Non renseignée'}</span></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}><MapPin size={16} /><span>{selectedMember.location || 'Non renseigné'}</span></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)' }}><Briefcase size={16} /><span>{selectedMember.profession || 'Non renseignée'}</span></div>
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <button className="btn btn-primary btn-block" style={{ marginBottom: '8px' }}>
+        <MessageCircle size={18} /> Démarrer une discussion
       </button>
-      
-      <button style={{
-        marginTop: '1rem',
-        background: 'transparent',
-        color: 'var(--primary-color)',
-        border: '2px solid var(--primary-color)',
-        padding: '1rem',
-        borderRadius: 'var(--radius-md)',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        cursor: 'pointer'
-      }}>
-        <UserPlus size={20} />
-        Ajouter un lien de parenté
-      </button>
+
+      <div style={{ marginTop: '16px' }}>
+        <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Ajouter un lien :</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+          {addOptions.map(o => (
+            <button key={o.rel} className="btn btn-outline btn-sm" onClick={() => openAddModal(o.rel)}>
+              <UserPlus size={14} /> {o.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selectedMember.relation !== 'moi' && (
+        <button className="btn btn-ghost btn-sm" onClick={() => { removeMember(selectedMember.id); selectMember(null); }} style={{ marginTop: 'auto', color: 'var(--danger)' }}>
+          <Trash2 size={16} /> Retirer de l'arbre
+        </button>
+      )}
     </div>
   );
 }

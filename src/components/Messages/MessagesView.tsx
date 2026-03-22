@@ -1,140 +1,129 @@
-import { useState } from 'react';
-import { Send, Phone, Video, Search } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Phone, Video, Search, Users as UsersIcon } from 'lucide-react';
 
-const MOCK_CONTACTS = [
-  { id: '2', name: 'Papa', online: true },
-  { id: '3', name: 'Maman', online: false },
-  { id: 'g1', name: 'Descendants de Confamily Senior', isGroup: true }
+type Contact = { id: string; name: string; online?: boolean; isGroup?: boolean; lastMessage?: string };
+type Message = { id: string; from: string; content: string; time: string; mine: boolean };
+
+const MOCK_CONTACTS: Contact[] = [
+  { id: '2', name: 'Papa', online: true, lastMessage: 'Bonjour fils !' },
+  { id: '3', name: 'Maman', online: false, lastMessage: 'Appelle-moi ce soir' },
+  { id: 'g1', name: 'Descendants de Grand-Père', isGroup: true, lastMessage: '3 nouveaux messages' }
 ];
 
+const MOCK_MESSAGES: Record<string, Message[]> = {
+  '2': [
+    { id: '1', from: 'Papa', content: 'Bonjour fils ! J\'ai ajouté une nouvelle photo sur mon profil.', time: '14:30', mine: false },
+    { id: '2', from: 'Moi', content: 'Super papa ! Je vais regarder ça. Tu as aussi ajouté oncle Jean ?', time: '14:32', mine: true },
+    { id: '3', from: 'Papa', content: 'Pas encore, je vais l\'inviter via WhatsApp.', time: '14:33', mine: false },
+  ],
+  '3': [
+    { id: '1', from: 'Maman', content: 'Mon enfant, appelle-moi quand tu peux.', time: '10:15', mine: false },
+    { id: '2', from: 'Moi', content: 'Oui maman, je t\'appelle à 20h !', time: '10:20', mine: true },
+  ],
+  'g1': [
+    { id: '1', from: 'Oncle Paul', content: 'La réunion familiale est prévue pour août !', time: '09:00', mine: false },
+    { id: '2', from: 'Tante Marie', content: 'Super initiative. Je serai là.', time: '09:15', mine: false },
+  ]
+};
+
 export function MessagesView() {
-  const [selectedContact, setSelectedContact] = useState(MOCK_CONTACTS[0]);
+  const [selected, setSelected] = useState<Contact>(MOCK_CONTACTS[0]);
+  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES['2']);
+  const [input, setInput] = useState('');
+  const [search, setSearch] = useState('');
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const selectContact = (c: Contact) => {
+    setSelected(c);
+    setMessages(MOCK_MESSAGES[c.id] || []);
+  };
+
+  const send = () => {
+    if (!input.trim()) return;
+    const msg: Message = { id: Date.now().toString(), from: 'Moi', content: input, time: new Date().toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' }), mine: true };
+    setMessages(prev => [...prev, msg]);
+    setInput('');
+  };
+
+  const filtered = MOCK_CONTACTS.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%' }}>
-      {/* Liste des contacts */}
-      <div style={{
-        width: '320px',
-        borderRight: '1px solid var(--border-color)',
-        background: 'var(--surface-color)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-          <h2 style={{ margin: 0 }}>Messages</h2>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'var(--bg-color)',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            marginTop: '1rem'
-          }}>
-            <Search size={18} color="var(--text-muted)" />
-            <input 
-              type="text" 
-              placeholder="Rechercher..." 
-              style={{ border: 'none', background: 'transparent', marginLeft: '10px', outline: 'none', width: '100%' }}
-            />
+      {/* Contacts Panel */}
+      <div style={{ width: '320px', borderRight: '1px solid var(--border-light)', background: 'var(--surface)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-light)' }}>
+          <h2 style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '12px' }}>Messages</h2>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg)', padding: '10px 16px', borderRadius: 'var(--radius-full)', gap: '8px' }}>
+            <Search size={16} color="var(--text-muted)" />
+            <input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', color: 'var(--text)', fontSize: '0.9rem' }} />
           </div>
         </div>
-        
         <div style={{ overflowY: 'auto', flex: 1 }}>
-          {MOCK_CONTACTS.map(c => (
-            <div 
-              key={c.id} 
-              onClick={() => setSelectedContact(c)}
-              style={{
-                padding: '1rem 1.5rem',
-                borderBottom: '1px solid var(--border-color)',
-                cursor: 'pointer',
-                background: selectedContact.id === c.id ? 'var(--bg-color)' : 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px'
-              }}
-            >
-              <div style={{
-                width: '45px', height: '45px', borderRadius: '50%',
-                background: c.isGroup ? 'var(--secondary-color)' : 'var(--primary-color)',
-                color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold'
-              }}>
-                {c.name.charAt(0)}
+          {filtered.map(c => (
+            <div key={c.id} onClick={() => selectContact(c)} style={{
+              padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px',
+              background: selected.id === c.id ? 'var(--primary-light)' : 'transparent',
+              borderLeft: selected.id === c.id ? '3px solid var(--primary)' : '3px solid transparent',
+              transition: 'var(--transition)'
+            }}>
+              <div className="avatar" style={{ background: c.isGroup ? 'linear-gradient(135deg, var(--secondary), var(--accent))' : undefined }}>
+                {c.isGroup ? <UsersIcon size={18} /> : c.name.charAt(0)}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'bold' }}>{c.name}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  {c.isGroup ? 'Groupe de branche' : (c.online ? 'En ligne' : 'Hors ligne')}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{c.name}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {c.lastMessage}
                 </div>
               </div>
+              {c.online && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Zone de chat */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-color)' }}>
-        {/* Header chat */}
-        <div style={{
-          padding: '1.5rem',
-          background: 'var(--surface-color)',
-          borderBottom: '1px solid var(--border-color)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{selectedContact.name}</div>
+      {/* Chat Area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+        {/* Chat Header */}
+        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="avatar avatar-sm">{selected.name.charAt(0)}</div>
+            <div>
+              <div style={{ fontWeight: 700 }}>{selected.name}</div>
+              <div style={{ fontSize: '0.75rem', color: selected.online ? 'var(--success)' : 'var(--text-muted)' }}>{selected.isGroup ? 'Groupe de branche' : (selected.online ? 'En ligne' : 'Hors ligne')}</div>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '15px', color: 'var(--primary-color)' }}>
-            <Phone size={24} style={{ cursor: 'pointer' }} />
-            <Video size={24} style={{ cursor: 'pointer' }} />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-icon btn-ghost"><Phone size={18} /></button>
+            <button className="btn btn-icon btn-ghost"><Video size={18} /></button>
           </div>
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-            Aujourd'hui
-          </div>
-          <div style={{ background: 'var(--surface-color)', padding: '1rem', borderRadius: '15px 15px 15px 0', maxWidth: '60%', marginBottom: '1rem', boxShadow: 'var(--shadow-sm)' }}>
-            Bonjour ! J'ai ajouté une nouvelle photo de famille sur mon profil.
-          </div>
-          <div style={{ background: 'var(--primary-color)', color: 'white', padding: '1rem', borderRadius: '15px 15px 0 15px', maxWidth: '60%', marginLeft: 'auto', marginBottom: '1rem', boxShadow: 'var(--shadow-sm)' }}>
-            Super, je vais regarder ça tout de suite !
-          </div>
+        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}><span className="badge" style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>Aujourd'hui</span></div>
+          {messages.map(m => (
+            <div key={m.id} style={{ display: 'flex', justifyContent: m.mine ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
+              <div style={{
+                maxWidth: '65%', padding: '12px 16px', borderRadius: m.mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                background: m.mine ? 'var(--primary)' : 'var(--surface)', color: m.mine ? '#fff' : 'var(--text)',
+                boxShadow: 'var(--shadow-xs)'
+              }}>
+                {!m.mine && <div style={{ fontWeight: 600, fontSize: '0.8rem', marginBottom: '4px', color: 'var(--primary)' }}>{m.from}</div>}
+                <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.5 }}>{m.content}</p>
+                <div style={{ fontSize: '0.7rem', opacity: 0.6, textAlign: 'right', marginTop: '4px' }}>{m.time}</div>
+              </div>
+            </div>
+          ))}
+          <div ref={endRef} />
         </div>
 
         {/* Input */}
-        <div style={{ padding: '1.5rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'var(--bg-color)',
-            padding: '0.8rem 1.5rem',
-            borderRadius: '30px',
-            gap: '15px'
-          }}>
-            <input 
-              type="text" 
-              placeholder="Écrivez votre message..." 
-              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '1rem' }}
-            />
-            <button style={{
-              background: 'var(--primary-color)',
-              color: 'white',
-              border: 'none',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}>
-              <Send size={18} />
-            </button>
+        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderTop: '1px solid var(--border-light)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg)', padding: '8px 8px 8px 20px', borderRadius: 'var(--radius-full)', gap: '8px' }}>
+            <input type="text" placeholder="Écrivez votre message..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.95rem', color: 'var(--text)' }} />
+            <button className="btn btn-primary btn-icon" onClick={send} style={{ width: '40px', height: '40px' }}><Send size={16} /></button>
           </div>
         </div>
       </div>
