@@ -212,3 +212,30 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-weight: 700; font-size: 1.1rem; border-radius: inherit;
 }
+
+/* ===== REACT FLOW DARK MODE OVERRIDES ===== */
+[data-theme="dark"] .react-flow__controls {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+[data-theme="dark"] .react-flow__controls-button {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  fill: var(--text);
+}
+[data-theme="dark"] .react-flow__controls-button:hover {
+  background: var(--surface-hover);
+}
+[data-theme="dark"] .react-flow__minimap {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+[data-theme="dark"] .react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .react-flow__minimap-node {
+  fill: var(--primary);
+}
