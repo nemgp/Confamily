@@ -27,7 +27,7 @@ export function LandingPage() {
           <span style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--text)' }}>Confamily</span>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <Link to="/login" className="btn btn-ghost btn-sm">Connexion</Link>
+          <Link to="/login" className="btn btn-outline btn-sm" style={{ fontWeight: 600 }}>Connexion</Link>
           <Link to="/register" className="btn btn-primary btn-sm">Commencer</Link>
         </div>
       </nav>
