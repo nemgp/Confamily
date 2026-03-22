@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useFamilyStore, Relation } from '../../store/familyStore';
+import { useState, useRef, useEffect } from 'react';
+import { useFamilyStore } from '../../store/familyStore';
 import { X, UserPlus, Camera } from 'lucide-react';
 
 const relationLabels: Record<string, string> = {
@@ -17,6 +17,16 @@ export function AddMemberModal() {
   const [gender, setGender] = useState<'M' | 'F'>('M');
   const [photoUrl, setPhotoUrl] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showAddModal) {
+      if (addRelationType === 'conjoint' && selectedMember?.gender) {
+        setGender(selectedMember.gender === 'M' ? 'F' : 'M');
+      } else {
+        setGender('M');
+      }
+    }
+  }, [showAddModal, addRelationType, selectedMember]);
 
   if (!showAddModal || !addRelationType) return null;
 
