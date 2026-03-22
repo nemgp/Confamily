@@ -1,0 +1,13 @@
+{
+  "name": "Confamily",
+  "short_name": "Confamily",
+  "description": "Le pont numérique entre les générations — arbre généalogique interactif et messagerie familiale",
+  "start_url": "/Confamily/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#d97736",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
