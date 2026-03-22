@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { FamilyTreeViewer } from './components/FamilyTree/FamilyTreeViewer';
 import { MemberDetails } from './components/FamilyTree/MemberDetails';
@@ -9,7 +10,8 @@ import { LoginPage, RegisterPage } from './pages/LoginPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { VaultPage } from './pages/VaultPage';
 import { PricingPage } from './pages/PricingPage';
-import { MessageSquare, Users, Settings, Lock, Crown, TreePine } from 'lucide-react';
+import { useFamilyStore } from './store/familyStore';
+import { MessageSquare, Settings, Lock, Crown, TreePine, List, LayoutGrid, MapPin, Briefcase, Calendar } from 'lucide-react';
 
 function Sidebar() {
   const loc = useLocation();
@@ -46,14 +48,87 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ListView() {
+  const { nodes, selectMember } = useFamilyStore();
+  return (
+    <div style={{ padding: '24px', overflowY: 'auto', height: '100%' }}>
+      <h2 style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '16px' }}>Membres de la famille</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {nodes.map(n => (
+          <div key={n.id} className="card" onClick={() => selectMember(n.id)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 20px', cursor: 'pointer' }}>
+            <div className="avatar">{n.data.firstName.charAt(0)}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>{n.data.firstName} {n.data.lastName}</div>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                {n.data.birthDate && <span><Calendar size={12} /> {n.data.birthDate}</span>}
+                {n.data.location && <span><MapPin size={12} /> {n.data.location}</span>}
+                {n.data.profession && <span><Briefcase size={12} /> {n.data.profession}</span>}
+              </div>
+            </div>
+            <span className="badge badge-primary">{n.data.relation}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GridView() {
+  const { nodes, selectMember } = useFamilyStore();
+  return (
+    <div style={{ padding: '24px', overflowY: 'auto', height: '100%' }}>
+      <h2 style={{ fontWeight: 800, fontSize: '1.3rem', marginBottom: '16px' }}>Membres de la famille</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+        {nodes.map(n => (
+          <div key={n.id} className="card" onClick={() => selectMember(n.id)} style={{ textAlign: 'center', cursor: 'pointer', padding: '24px 16px' }}>
+            <div className="avatar avatar-lg" style={{ margin: '0 auto 12px' }}>{n.data.firstName.charAt(0)}</div>
+            <div style={{ fontWeight: 700, marginBottom: '4px' }}>{n.data.firstName}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{n.data.lastName}</div>
+            <span className="badge badge-primary">{n.data.relation}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DashboardPage() {
+  const [viewMode, setViewMode] = useState<'tree' | 'list' | 'grid'>('tree');
+  const modes: { key: 'tree' | 'list' | 'grid'; icon: typeof TreePine; label: string }[] = [
+    { key: 'tree', icon: TreePine, label: 'Arbre' },
+    { key: 'list', icon: List, label: 'Liste' },
+    { key: 'grid', icon: LayoutGrid, label: 'Grille' },
+  ];
+
   return (
     <AppLayout>
+      {/* Top toolbar */}
+      <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 5, display: 'flex', gap: '4px', background: 'var(--surface)', borderRadius: 'var(--radius-full)', padding: '4px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-light)' }}>
+        {modes.map(m => (
+          <button
+            key={m.key}
+            onClick={() => setViewMode(m.key)}
+            className={`btn btn-sm ${viewMode === m.key ? 'btn-primary' : 'btn-ghost'}`}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-full)', fontSize: '0.8rem' }}
+            title={m.label}
+          >
+            <m.icon size={16} /> <span className="hide-mobile">{m.label}</span>
+          </button>
+        ))}
+      </div>
       <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 5 }}>
         <PrintTree />
       </div>
-      <FamilyTreeViewer />
-      <MemberDetails />
+
+      {viewMode === 'tree' && (
+        <>
+          <FamilyTreeViewer />
+          <MemberDetails />
+        </>
+      )}
+
+      {viewMode === 'list' && <ListView />}
+      {viewMode === 'grid' && <GridView />}
     </AppLayout>
   );
 }
