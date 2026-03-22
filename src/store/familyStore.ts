@@ -220,15 +220,39 @@ function layoutTree(nodes: TreeNode[], relations: RelationLink[]): { nodes: Tree
 
 // Initial data
 const initialRelations: RelationLink[] = [
+  // Grands-parents -> Papa
+  { fromId: '9', toId: '2', type: 'parent_child' },
+  { fromId: '10', toId: '2', type: 'parent_child' },
+  { fromId: '9', toId: '10', type: 'spouse' },
+  
+  // Papa & Maman -> Moi, Sœur, Frère
   { fromId: '2', toId: '1', type: 'parent_child' },
   { fromId: '3', toId: '1', type: 'parent_child' },
+  { fromId: '2', toId: '4', type: 'parent_child' },
+  { fromId: '3', toId: '4', type: 'parent_child' },
+  { fromId: '2', toId: '5', type: 'parent_child' },
+  { fromId: '3', toId: '5', type: 'parent_child' },
   { fromId: '2', toId: '3', type: 'spouse' },
+
+  // Moi & Conjointe -> Enfants
+  { fromId: '1', toId: '6', type: 'spouse' },
+  { fromId: '1', toId: '7', type: 'parent_child' },
+  { fromId: '6', toId: '7', type: 'parent_child' },
+  { fromId: '1', toId: '8', type: 'parent_child' },
+  { fromId: '6', toId: '8', type: 'parent_child' },
 ];
 
 const initialMembers: FamilyMember[] = [
   { id: '1', firstName: 'Moi', lastName: 'Confamily', relation: 'moi', gender: 'M', isAlive: true },
-  { id: '2', firstName: 'Papa', lastName: 'Confamily', relation: 'parent', gender: 'M', isAlive: true },
-  { id: '3', firstName: 'Maman', lastName: 'Confamily', relation: 'parent', gender: 'F', isAlive: true },
+  { id: '2', firstName: 'Jean', lastName: 'Confamily', relation: 'parent', gender: 'M', isAlive: true },
+  { id: '3', firstName: 'Marie', lastName: 'Confamily', relation: 'parent', gender: 'F', isAlive: true },
+  { id: '4', firstName: 'Alice', lastName: 'Confamily', relation: 'frere_soeur', gender: 'F', isAlive: true },
+  { id: '5', firstName: 'Marc', lastName: 'Confamily', relation: 'frere_soeur', gender: 'M', isAlive: true },
+  { id: '6', firstName: 'Sophie', lastName: 'Durand', relation: 'conjoint', gender: 'F', isAlive: true },
+  { id: '7', firstName: 'Thomas', lastName: 'Confamily', relation: 'enfant', gender: 'M', isAlive: true },
+  { id: '8', firstName: 'Léa', lastName: 'Confamily', relation: 'enfant', gender: 'F', isAlive: true },
+  { id: '9', firstName: 'Grand-Père', lastName: 'Confamily', relation: 'grand_parent', gender: 'M', isAlive: true },
+  { id: '10', firstName: 'Grand-Mère', lastName: 'Confamily', relation: 'grand_parent', gender: 'F', isAlive: true },
 ];
 
 const initialNodes: TreeNode[] = initialMembers.map(m => ({
