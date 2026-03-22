@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { FamilyTreeViewer } from './components/FamilyTree/FamilyTreeViewer';
 import { MemberDetails } from './components/FamilyTree/MemberDetails';
 import { MessagesView } from './components/Messages/MessagesView';
@@ -72,13 +72,13 @@ function MessagesLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<OnboardingView />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/messages" element={<MessagesLayout />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
