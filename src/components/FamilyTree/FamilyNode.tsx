@@ -3,7 +3,6 @@ import { FamilyMember } from '../../store/familyStore';
 
 export function FamilyNode({ data }: { data: FamilyMember }) {
   const isMe = data.relation === 'moi';
-  const initial = data.firstName.charAt(0).toUpperCase();
   const genderColor = data.gender === 'F' ? '#e8a87c' : '#d97736';
 
   return (
@@ -24,16 +23,13 @@ export function FamilyNode({ data }: { data: FamilyMember }) {
       <Handle type="target" position={Position.Top} style={{ background: genderColor, border: 'none', width: 8, height: 8 }} />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
-        {data.photoUrl ? (
-          <img src={data.photoUrl} alt={data.firstName} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: isMe ? '2px solid #fff' : `2px solid ${genderColor}` }} />
-        ) : (
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: isMe ? 'rgba(255,255,255,0.25)' : `linear-gradient(135deg, ${genderColor}, var(--accent))`,
-            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: '0.85rem',
-          }}>{initial}</div>
-        )}
+        <img 
+          src={data.photoUrl || (data.gender === 'F' 
+            ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Jocelyn&backgroundColor=ffdfbf' 
+            : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4')} 
+          alt={data.firstName} 
+          style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: isMe ? '2px solid #fff' : `2px solid ${genderColor}`, background: '#fff' }} 
+        />
         <div>
           <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{data.firstName}</div>
           <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{data.lastName}</div>
