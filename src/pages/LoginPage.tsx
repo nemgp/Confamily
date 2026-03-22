@@ -21,7 +21,7 @@ export function LoginPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: 'var(--bg)' }}>
       <div className="card card-elevated animate-slide" style={{ width: '100%', maxWidth: '420px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div className="avatar avatar-lg" style={{ margin: '0 auto 16px' }}>C</div>
+          <img src="/Confamily/logo.png" alt="Confamily Logo" style={{ display: 'block', width: 80, height: 80, borderRadius: 16, objectFit: 'cover', margin: '0 auto 16px' }} />
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '8px' }}>Bon retour !</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Connectez-vous à votre famille</p>
         </div>
@@ -66,7 +66,7 @@ export function RegisterPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: 'var(--bg)' }}>
       <div className="card card-elevated animate-slide" style={{ width: '100%', maxWidth: '420px', padding: '40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div className="avatar avatar-lg" style={{ margin: '0 auto 16px' }}>C</div>
+          <img src="/Confamily/logo.png" alt="Confamily Logo" style={{ display: 'block', width: 80, height: 80, borderRadius: 16, objectFit: 'cover', margin: '0 auto 16px' }} />
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '8px' }}>Créer votre famille</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Rejoignez Confamily gratuitement</p>
         </div>
