@@ -147,19 +147,6 @@ function DashboardPage() {
 
       {viewMode === 'list' && <ListView />}
       {viewMode === 'grid' && <GridView />}
-
-      {/* WhatsApp Invite - bottom left */}
-      <button
-        onClick={() => {
-          const link = window.location.origin + window.location.pathname + '#/register';
-          const msg = `🌳 Rejoins notre arbre généalogique familial sur Confamily ! Inscris-toi ici : ${link}`;
-          window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }}
-        className="btn btn-primary"
-        style={{ position: 'absolute', bottom: '24px', left: '24px', zIndex: 5, borderRadius: 'var(--radius-full)', padding: '12px 20px', boxShadow: 'var(--shadow-md)', fontSize: '0.85rem' }}
-      >
-        📱 Inviter via WhatsApp
-      </button>
     </AppLayout>
   );
 }
