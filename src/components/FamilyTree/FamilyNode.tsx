@@ -54,17 +54,17 @@ export function FamilyNode({ data }: { data: FamilyMember }) {
 
       {/* Name */}
       <div style={{ fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.2 }}>{data.firstName}</div>
-      <div style={{ fontSize: '0.75rem', opacity: isMe ? 0.85 : 0.6, marginBottom: data.location || data.profession ? '6px' : 0 }}>{data.lastName}</div>
+      <div style={{ fontSize: '0.75rem', opacity: isMe ? 0.85 : 0.6, marginBottom: ((data.location && data.location !== 'undefined') || (data.profession && data.profession !== 'undefined')) ? '6px' : 0 }}>{data.lastName}</div>
 
       {/* Extra info */}
-      {(data.location || data.profession) && (
+      {((data.location && data.location !== 'undefined') || (data.profession && data.profession !== 'undefined')) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
-          {data.profession && (
+          {(data.profession && data.profession !== 'undefined') && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '0.68rem', opacity: 0.75 }}>
               <Briefcase size={10} /> {data.profession}
             </div>
           )}
-          {data.location && (
+          {(data.location && data.location !== 'undefined') && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '0.68rem', opacity: 0.75 }}>
               <MapPin size={10} /> {data.location}
             </div>
