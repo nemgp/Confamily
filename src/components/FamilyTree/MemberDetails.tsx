@@ -100,9 +100,18 @@ export function MemberDetails() {
       </div>
 
       {/* Actions */}
-      <button className="btn btn-primary btn-block" style={{ marginBottom: '8px' }}>
-        <MessageCircle size={18} /> Démarrer une discussion
-      </button>
+      {selectedMember.relation !== 'moi' && (
+        <button 
+          className="btn btn-primary btn-block" 
+          style={{ marginBottom: '8px' }}
+          onClick={() => {
+            const tempId = selectedMember.linkedUserId || selectedMember.id;
+            window.location.hash = `/messages?contactId=${tempId}`;
+          }}
+        >
+          <MessageCircle size={18} /> Démarrer une discussion
+        </button>
+      )}
 
       <div style={{ marginTop: '16px' }}>
         <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Ajouter un lien :</p>
