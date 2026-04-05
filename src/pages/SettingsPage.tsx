@@ -10,8 +10,28 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState('fr');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement votre compte et votre accès ? Cette action est irréversible.")) {
+      setIsDeleting(true);
+      try {
+        const { deleteAccount } = await import('../api/googleAPI');
+        const res = await deleteAccount();
+        if (res.success) {
+          logout();
+          navigate('/');
+        } else {
+          alert("Erreur lors de la suppression du compte : " + res.error);
+        }
+      } catch (e) {
+        alert("Erreur réseau");
+      }
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 20px' }}>
@@ -127,10 +147,15 @@ export function SettingsPage() {
         <WhatsAppInvite />
       </div>
 
-      {/* Logout */}
-      <button className="btn btn-ghost btn-block" onClick={handleLogout} style={{ color: 'var(--danger)', justifyContent: 'center' }}>
-        <LogOut size={18} /> Se déconnecter
-      </button>
+      {/* Logout & Delete */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <button className="btn btn-ghost btn-block" onClick={handleLogout} style={{ color: 'var(--text-secondary)', justifyContent: 'center' }}>
+          <LogOut size={18} /> Se déconnecter
+        </button>
+        <button className="btn btn-outline btn-block" onClick={handleDeleteAccount} disabled={isDeleting} style={{ color: 'var(--danger)', borderColor: 'var(--danger)', justifyContent: 'center' }}>
+          {isDeleting ? 'Suppression en cours...' : 'Supprimer mon compte'}
+        </button>
+      </div>
     </div>
   );
 }

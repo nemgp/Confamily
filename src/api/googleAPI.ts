@@ -145,6 +145,10 @@ export async function logout() {
   clearSession();
 }
 
+export async function deleteAccount() {
+  return api({ action: 'deleteAccount' });
+}
+
 export async function requestPasswordReset(email: string) {
   return api({ action: 'requestPasswordReset', email });
 }

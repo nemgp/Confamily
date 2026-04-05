@@ -81,6 +81,7 @@ function route(e) {
     if (action === 'resolveInvite') return jsonOut(resolveInvite(p));
     if (action === 'requestPasswordReset') return jsonOut(requestPasswordReset(p));
     if (action === 'resetPassword') return jsonOut(resetPassword(p));
+    if (action === 'deleteAccount') return jsonOut(deleteAccount(p, validateSession(p.sessionId)));
 
     // Protected routes — validate session first
     var session = validateSession(p.sessionId);
@@ -161,6 +162,20 @@ function logout(p, session) {
     }
   }
   return { success: true };
+}
+
+function deleteAccount(p, session) {
+  if (!session || !session.userId) return { success: false, error: 'Non autorisé' };
+  
+  var sheet = getSheet('Users');
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][3] === session.userId) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false, error: 'Compte introuvable' };
 }
 
 // ─────────────────────────────────────────────
