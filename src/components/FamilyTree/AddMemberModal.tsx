@@ -8,7 +8,7 @@ const relationLabels: Record<string, string> = {
 };
 
 export function AddMemberModal() {
-  const { showAddModal, addRelationType, closeAddModal, addMember, selectedMember, getParentsOf } = useFamilyStore();
+  const { showAddModal, addRelationType, closeAddModal, addMemberRemote, selectedMember, getParentsOf } = useFamilyStore();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -63,7 +63,7 @@ export function AddMemberModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const id = 'member_' + Date.now();
-    addMember(
+    addMemberRemote(
       { id, firstName, lastName, birthDate, location, profession, relation: addRelationType, gender, isAlive: true, photoUrl: photoUrl || undefined },
       refId,
       addRelationType

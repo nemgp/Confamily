@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Check, Crown, TreePine, Lock, Printer, Users, X } from 'lucide-react';
+import { Check, Crown, TreePine, Lock, Printer, X, Sparkles } from 'lucide-react';
 
 const plans = [
   {
@@ -18,6 +17,7 @@ const plans = [
     ],
     cta: 'Plan actuel',
     highlight: false,
+    isCurrent: true,
   },
   {
     name: 'Famille XL',
@@ -33,8 +33,9 @@ const plans = [
       { text: "Impression HD de l'arbre", ok: true },
       { text: 'Support prioritaire', ok: true },
     ],
-    cta: 'Choisir ce plan',
+    cta: 'Passer en Premium',
     highlight: true,
+    isCurrent: false,
   }
 ];
 
@@ -53,8 +54,10 @@ export function PricingPage() {
             padding: '32px', position: 'relative',
             border: p.highlight ? '2px solid var(--primary)' : '1px solid var(--border-light)',
             boxShadow: p.highlight ? 'var(--shadow-glow)' : 'var(--shadow-xs)',
+            opacity: p.isCurrent ? 0.8 : 1,
           }}>
             {p.badge && <span className="badge badge-primary" style={{ position: 'absolute', top: '-12px', right: '20px' }}>{p.badge}</span>}
+            {p.isCurrent && <span className="badge badge-success" style={{ position: 'absolute', top: '-12px', left: '20px' }}>Plan actuel</span>}
             <h3 style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: '8px' }}>{p.name}</h3>
             <div style={{ marginBottom: '24px' }}>
               <span style={{ fontSize: '2.5rem', fontWeight: 900 }}>{p.price}€</span>
@@ -68,7 +71,15 @@ export function PricingPage() {
                 </div>
               ))}
             </div>
-            <button className={`btn btn-block ${p.highlight ? 'btn-primary' : 'btn-outline'}`}>{p.cta}</button>
+            {p.isCurrent ? (
+              <button className="btn btn-block btn-ghost" disabled style={{ opacity: 0.5, cursor: 'not-allowed', border: '2px solid var(--border)' }}>
+                <Check size={16} /> Plan actuel
+              </button>
+            ) : (
+              <button className="btn btn-block btn-primary">
+                <Sparkles size={16} /> {p.cta}
+              </button>
+            )}
           </div>
         ))}
       </div>

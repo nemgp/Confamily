@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import * as API from '../api/googleAPI';
 
 export type Relation = 'moi' | 'parent' | 'enfant' | 'conjoint' | 'frere_soeur' | 'grand_parent' | 'oncle_tante' | 'cousin';
 
@@ -13,6 +14,8 @@ export type FamilyMember = {
   relation: Relation;
   gender?: 'M' | 'F';
   isAlive?: boolean;
+  linkedUserId?: string;
+  isBridge?: boolean;
 };
 
 export type TreeNode = {
@@ -45,6 +48,10 @@ interface FamilyState {
   selectedMember: FamilyMember | null;
   showAddModal: boolean;
   addRelationType: Relation | null;
+  isSyncing: boolean;
+  syncError: string | null;
+  bridgeNodes: FamilyMember[]; // ghost nodes from other trees
+  // Local actions
   selectMember: (id: string | null) => void;
   addMember: (member: FamilyMember, refId: string, relType: Relation) => void;
   updateMember: (id: string, updates: Partial<FamilyMember>) => void;
@@ -54,6 +61,11 @@ interface FamilyState {
   getParentsOf: (id: string) => string[];
   edgeCustomColors: Record<string, string>;
   cycleEdgeColor: (edgeId: string) => void;
+  // Backend sync actions
+  syncWithBackend: () => Promise<void>;
+  addMemberRemote: (member: FamilyMember, refId: string, relType: Relation) => Promise<void>;
+  updateMemberRemote: (id: string, updates: Partial<FamilyMember>) => Promise<void>;
+  removeMemberRemote: (id: string) => Promise<void>;
 }
 
 const EDGE_STYLE_VERTICAL = { stroke: '#d97736', strokeWidth: 2 };
@@ -274,6 +286,90 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
   selectedMember: null,
   showAddModal: false,
   addRelationType: null,
+  isSyncing: false,
+  syncError: null,
+  bridgeNodes: [],
+
+  // ─── Backend sync ───────────────────────────────────────────────
+  syncWithBackend: async () => {
+    set({ isSyncing: true, syncError: null });
+    try {
+      const res = await API.getTree();
+      if (!res.success) throw new Error(res.error || 'Erreur serveur');
+
+      // Map API members → FamilyMember
+      const apiMembers: FamilyMember[] = (res.members || []).map((m: API.Member) => ({
+        id: m.id, firstName: m.firstName, lastName: m.lastName,
+        birthDate: m.birthDate, location: m.location, profession: m.profession,
+        photoUrl: m.photoUrl, relation: (m.relation as Relation) || 'moi',
+        gender: m.gender === 'male' ? 'M' : m.gender === 'female' ? 'F' : undefined,
+        isAlive: m.isAlive !== false,
+        linkedUserId: m.linkedUserId,
+      }));
+
+      // Map API relations
+      const apiRelations: RelationLink[] = (res.relations || []).map((r: API.Relation) => ({
+        fromId: r.fromId, toId: r.toId, type: r.type,
+      }));
+
+      // Bridge ghost nodes
+      const bridgeNodes: FamilyMember[] = (res.bridges || []).map((b: API.Member) => ({
+        id: b.id, firstName: b.firstName, lastName: b.lastName,
+        photoUrl: b.photoUrl, relation: (b.relation as Relation) || 'conjoint',
+        gender: b.gender === 'male' ? 'M' : 'F',
+        linkedToLocalMember: b.linkedToLocalMember,
+        isBridge: true,
+      } as FamilyMember & { isBridge: boolean; linkedToLocalMember?: string }));
+
+      const apiNodes: TreeNode[] = apiMembers.map(m => ({ id: m.id, position: { x: 0, y: 0 }, data: m, type: 'familyNode' }));
+      const result = layoutTree(apiNodes, apiRelations, get().edgeCustomColors);
+
+      set({
+        nodes: result.nodes, edges: result.edges,
+        relations: apiRelations, bridgeNodes, isSyncing: false,
+      });
+    } catch (e: unknown) {
+      // If API not configured, silently use local mock data
+      const msg = e instanceof Error ? e.message : 'Erreur synchro';
+      if (!msg.includes('API non configurée')) {
+        set({ syncError: msg });
+      }
+      set({ isSyncing: false });
+    }
+  },
+
+  addMemberRemote: async (member, refId, relType) => {
+    // Optimistic local update first
+    get().addMember(member, refId, relType);
+    try {
+      const res = await API.addMember({
+        firstName: member.firstName, lastName: member.lastName,
+        gender: member.gender === 'M' ? 'male' : 'female',
+        birthDate: member.birthDate, location: member.location,
+        profession: member.profession, relation: relType,
+        refId, relType: relType === 'parent' ? 'parent_child' : relType === 'enfant' ? 'parent_child' : relType === 'conjoint' ? 'spouse' : 'sibling',
+      });
+      if (res.success && res.memberId && res.memberId !== member.id) {
+        // Update local id to match server id
+        get().updateMember(member.id, { id: res.memberId } as Partial<FamilyMember>);
+      }
+    } catch { /* silently keep local */ }
+  },
+
+  updateMemberRemote: async (id, updates) => {
+    get().updateMember(id, updates);
+    try {
+      await API.updateMember(id, {
+        ...updates,
+        gender: updates.gender === 'M' ? 'male' : updates.gender === 'F' ? 'female' : undefined,
+      } as Partial<API.Member>);
+    } catch { /* silently keep local */ }
+  },
+
+  removeMemberRemote: async (id) => {
+    get().removeMember(id);
+    try { await API.removeMember(id); } catch { /* silently keep local */ }
+  },
 
   selectMember: (id) => set((state) => ({
     selectedMember: id ? state.nodes.find(n => n.id === id)?.data || null : null

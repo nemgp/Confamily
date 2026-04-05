@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, Video, Search, Users as UsersIcon } from 'lucide-react';
+import { Send, Phone, Video, Search, Users as UsersIcon, ChevronLeft } from 'lucide-react';
 
 type Contact = { id: string; name: string; online?: boolean; isGroup?: boolean; lastMessage?: string; gender?: 'M' | 'F'; photoUrl?: string };
 type Message = { id: string; from: string; content: string; time: string; mine: boolean };
@@ -100,8 +100,13 @@ export function MessagesView() {
         {/* Chat Header */}
         <div style={{ padding: '16px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="btn btn-icon btn-ghost show-mobile" onClick={() => setMobileShowChat(false)} style={{ marginRight: -4 }}>
-              <Search size={20} style={{ transform: 'rotate(90deg)' }} /> {/* Using search as back icon arrow substitute if Chevron not imported */}
+            <button
+              className="btn btn-ghost show-mobile"
+              onClick={() => setMobileShowChat(false)}
+              style={{ marginRight: -4, minWidth: 44, minHeight: 44, padding: '10px' }}
+              title="Retour"
+            >
+              <ChevronLeft size={24} />
             </button>
             {selected.isGroup ? (
               <div className="avatar avatar-sm" style={{ background: 'linear-gradient(135deg, var(--secondary), var(--accent))' }}>

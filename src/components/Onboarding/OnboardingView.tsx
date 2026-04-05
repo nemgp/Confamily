@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { ChevronRight, TreePine, MessageCircle, Share2, Check } from 'lucide-react';
+import { ChevronRight, TreePine, Check } from 'lucide-react';
 
 const steps = [
   { title: 'Votre profil', subtitle: 'Commençons par vous' },

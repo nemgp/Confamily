@@ -8,7 +8,7 @@ const relationLabels: Record<Relation, string> = {
 };
 
 export function MemberDetails() {
-  const { selectedMember, selectMember, openAddModal, updateMember, removeMember } = useFamilyStore();
+  const { selectedMember, selectMember, openAddModal, updateMemberRemote, removeMemberRemote } = useFamilyStore();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const photoRef = useRef<HTMLInputElement>(null);
@@ -21,7 +21,7 @@ export function MemberDetails() {
   };
 
   const saveEdit = () => {
-    updateMember(selectedMember.id, form);
+    updateMemberRemote(selectedMember.id, form);
     setEditing(false);
   };
 
@@ -64,7 +64,7 @@ export function MemberDetails() {
             const file = e.target.files?.[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onloadend = () => updateMember(selectedMember.id, { photoUrl: reader.result as string });
+            reader.onloadend = () => updateMemberRemote(selectedMember.id, { photoUrl: reader.result as string });
             reader.readAsDataURL(file);
           }} />
         </div>
@@ -115,8 +115,26 @@ export function MemberDetails() {
         </div>
       </div>
 
+      {!selectedMember.linkedUserId && selectedMember.relation !== 'moi' && (
+        <button 
+          className="btn btn-outline btn-block" 
+          style={{ marginTop: '16px', borderColor: '#25D366', color: '#25D366' }}
+          onClick={async () => {
+             const res = await import('../../api/googleAPI').then(m => m.createInvite(selectedMember.id));
+             if (res.success && res.code) {
+               const url = await import('../../api/googleAPI').then(m => m.buildInviteUrl(res.code));
+               const waUrl = await import('../../api/googleAPI').then(m => m.buildWhatsAppUrl(url, selectedMember.firstName));
+               window.open(waUrl, '_blank');
+             }
+          }}
+        >
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style={{ width: 16, height: 16, marginRight: 8 }} />
+          Inviter cette personne
+        </button>
+      )}
+
       {selectedMember.relation !== 'moi' && (
-        <button className="btn btn-ghost btn-sm" onClick={() => { removeMember(selectedMember.id); selectMember(null); }} style={{ marginTop: 'auto', color: 'var(--danger)' }}>
+        <button className="btn btn-ghost btn-sm" onClick={() => { removeMemberRemote(selectedMember.id); selectMember(null); }} style={{ marginTop: 'auto', color: 'var(--danger)' }}>
           <Trash2 size={16} /> Retirer de l'arbre
         </button>
       )}
