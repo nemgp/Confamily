@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useAuthStore } from './authStore';
 import * as API from '../api/googleAPI';
 
 export type Relation = 'moi' | 'parent' | 'enfant' | 'conjoint' | 'frere_soeur' | 'grand_parent' | 'oncle_tante' | 'cousin';
@@ -307,6 +308,12 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
   },
 
   addMemberRemote: async (member, refId, relType) => {
+    const { user } = useAuthStore.getState();
+    if (!user?.isPremium && get().nodes.length >= 50) {
+      alert("Plan gratuit limité à 50 membres. L'arbre a atteint la limite.\nVeuillez passer en Premium pour ajouter des membres en illimité.");
+      return;
+    }
+
     // Optimistic local update first
     get().addMember(member, refId, relType);
     try {

@@ -108,6 +108,7 @@ function route(e) {
       case 'deleteVaultFile':  result = deleteVaultFile(p, session); break;
       // Premium
       case 'upgradeUser':      result = upgradeUser(p, session); break;
+      case 'submitPayment':    result = submitPayment(p, session); break;
       // Session
       case 'logout':           result = logout(p, session); break;
       default: result = { success: false, error: 'Action inconnue: ' + action };
@@ -624,4 +625,19 @@ function upgradeUser(p, session) {
     }
   }
   return { success: false, error: 'Utilisateur introuvable' };
+}
+
+function submitPayment(p, session) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('Payments');
+    if (!sheet) {
+      sheet = ss.insertSheet('Payments');
+      sheet.appendRow(['userId', 'method', 'transactionId', 'date']);
+    }
+    sheet.appendRow([session.userId, p.method, p.transactionId, new Date()]);
+    return upgradeUser(p, session);
+  } catch(err) {
+    return { success: false, error: err.toString() };
+  }
 }

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Check, Crown, TreePine, Lock, Printer, X, Sparkles } from 'lucide-react';
+import { PaymentModal } from '../components/Premium/PaymentModal';
 
 const plans = [
   {
@@ -21,8 +23,8 @@ const plans = [
   },
   {
     name: 'Famille XL',
-    price: '4.99',
-    period: '/mois',
+    price: '10',
+    period: '/an',
     badge: 'Populaire',
     features: [
       { text: 'Membres illimités', ok: true },
@@ -40,6 +42,8 @@ const plans = [
 ];
 
 export function PricingPage() {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '60px 20px', textAlign: 'center' }}>
       <span className="badge badge-premium" style={{ marginBottom: '16px' }}><Crown size={12} /> Premium</span>
@@ -84,13 +88,15 @@ export function PricingPage() {
                 <Check size={16} /> Plan actuel
               </button>
             ) : (
-              <button className="btn btn-block btn-primary">
+              <button className="btn btn-block btn-primary" onClick={() => setShowPaymentModal(true)}>
                 <Sparkles size={16} /> {p.cta}
               </button>
             )}
           </div>
         ))}
       </div>
+
+      {showPaymentModal && <PaymentModal onClose={() => setShowPaymentModal(false)} />}
 
       <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Lock size={14} /> Paiement sécurisé</span>

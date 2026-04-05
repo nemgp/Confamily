@@ -280,3 +280,7 @@ export async function deleteVaultFile(fileId: string) {
 export async function upgradeUser() {
   return api({ action: 'upgradeUser' });
 }
+
+export async function submitPayment(method: string, transactionId: string) {
+  return api({ action: 'submitPayment', method, transactionId });
+}
