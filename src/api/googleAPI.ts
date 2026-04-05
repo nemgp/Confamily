@@ -5,7 +5,7 @@
 // ou dans .env : VITE_API_URL=https://script.google.com/...
 // =============================================
 
-const API_URL = (import.meta as any).env?.VITE_API_URL || '';
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://script.google.com/macros/s/AKfycbygw_ECSjY-zXRoyG-K-wKzpDh3owiWA-ANnow3gXoGUl8jNMkKN9t-BP8KLbwf-yHb/exec';
 
 // ─────────────────────────────────────────────
 // STORAGE HELPERS
