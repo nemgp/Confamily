@@ -29,13 +29,22 @@ export function OnboardingView() {
 
       await addMemberRemote({ id: moiId, firstName: fName, lastName: lName, relation: 'moi', gender: 'M', isAlive: true, linkedUserId: user?.id }, '1', 'moi');
 
+      const p1Id = 'p1_' + Date.now();
+      const p2Id = 'p2_' + Date.now();
+
       if (parentName1) {
         const p1 = parentName1.split(' ');
-        await addMemberRemote({ id: 'p1_' + Date.now(), firstName: p1[0] || 'Parent 1', lastName: p1.slice(1).join(' ') || lName, relation: 'parent', gender: 'M', isAlive: true }, moiId, 'parent');
+        await addMemberRemote({ id: p1Id, firstName: p1[0] || 'Parent 1', lastName: p1.slice(1).join(' ') || lName, relation: 'parent', gender: 'M', isAlive: true }, moiId, 'parent');
       }
       if (parentName2) {
         const p2 = parentName2.split(' ');
-        await addMemberRemote({ id: 'p2_' + Date.now(), firstName: p2[0] || 'Parent 2', lastName: p2.slice(1).join(' ') || lName, relation: 'parent', gender: 'F', isAlive: true }, moiId, 'parent');
+        await addMemberRemote({ id: p2Id, firstName: p2[0] || 'Parent 2', lastName: p2.slice(1).join(' ') || lName, relation: 'parent', gender: 'F', isAlive: true }, moiId, 'parent');
+      }
+
+      // Link parents together if both exist
+      if (parentName1 && parentName2) {
+        const { addRelation } = await import('../../api/googleAPI');
+        await addRelation(p1Id, p2Id, 'spouse');
       }
     } catch(e) {
       console.error(e);

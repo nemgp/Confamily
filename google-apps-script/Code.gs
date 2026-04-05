@@ -390,7 +390,13 @@ function addMember(p, session) {
 
   // Add relation if parentId or relType provided
   if (p.refId && p.relType) {
-    addRelationRow(treeId, p.refId, memberId, p.relType);
+    if (p.relation === 'parent') {
+      // The new member is the parent, so they are the fromId
+      addRelationRow(treeId, memberId, p.refId, p.relType);
+    } else {
+      // The new member is the child/spouse/sibling
+      addRelationRow(treeId, p.refId, memberId, p.relType);
+    }
   }
 
   return { success: true, memberId: memberId };
