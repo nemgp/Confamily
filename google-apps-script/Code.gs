@@ -79,6 +79,8 @@ function route(e) {
     if (action === 'register')      return jsonOut(registerUser(p));
     if (action === 'login')         return jsonOut(loginUser(p));
     if (action === 'resolveInvite') return jsonOut(resolveInvite(p));
+    if (action === 'requestPasswordReset') return jsonOut(requestPasswordReset(p));
+    if (action === 'resetPassword') return jsonOut(resetPassword(p));
 
     // Protected routes — validate session first
     var session = validateSession(p.sessionId);
@@ -164,6 +166,88 @@ function logout(p, session) {
 // ─────────────────────────────────────────────
 // AUTH
 // ─────────────────────────────────────────────
+
+function requestPasswordReset(p) {
+  if (!p.email) return { success: false, error: 'Email manquant' };
+  
+  // Verify if user exists
+  var data = getSheet('Users').getDataRange().getValues();
+  var exists = false;
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === p.email) {
+      exists = true; break;
+    }
+  }
+  if (!exists) return { success: false, error: 'Cet email n\'existe pas' };
+
+  var otp = Math.floor(100000 + Math.random() * 900000).toString();
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('ResetTokens');
+  if (!sheet) {
+    sheet = ss.insertSheet('ResetTokens');
+    sheet.appendRow(['email', 'otp', 'expiresAt']);
+  }
+  
+  var expires = addDays(new Date(), 1); // expire dans 1 jour
+  sheet.appendRow([p.email, otp, expires]);
+
+  try {
+    MailApp.sendEmail({
+      to: p.email,
+      subject: "Confamily — Réinitialisation de votre mot de passe",
+      htmlBody: "<p>Bonjour,</p><p>Suite à votre demande, voici votre code de réinitialisation de mot de passe :</p><h2>" + otp + "</h2><p>Ce code expire dans 24 heures.</p><p>L'équipe Confamily</p>"
+    });
+    return { success: true };
+  } catch(e) {
+    return { success: false, error: 'Erreur lors de l\'envoi de l\'email : ' + e.toString() };
+  }
+}
+
+function resetPassword(p) {
+  if (!p.email || !p.otp || !p.newPassword) return { success: false, error: 'Paramètres manquants' };
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheetInfo = ss.getSheetByName('ResetTokens');
+  if (!sheetInfo) return { success: false, error: 'Aucune demande enregistrée' };
+
+  var data = sheetInfo.getDataRange().getValues();
+  var validIndex = -1;
+  var now = new Date();
+
+  // Find valid OTP (latest match)
+  for (var i = data.length - 1; i >= 1; i--) {
+    if (data[i][0] === p.email && data[i][1].toString() === p.otp) {
+      var expires = new Date(data[i][2]);
+      if (now < expires) {
+        validIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (validIndex === -1) return { success: false, error: 'Code invalide ou expiré' };
+
+  // Update password
+  var uSheet = getSheet('Users');
+  var uData = uSheet.getDataRange().getValues();
+  var changed = false;
+  for (var j = 1; j < uData.length; j++) {
+    if (uData[j][0] === p.email) {
+      uSheet.getRange(j + 1, 2).setValue(hashPassword(p.newPassword));
+      changed = true;
+      break;
+    }
+  }
+
+  if (changed) {
+    // Nettoyer tous les codes de cet email
+    for (var k = data.length - 1; k >= 1; k--) {
+      if (data[k][0] === p.email) sheetInfo.deleteRow(k + 1);
+    }
+    return { success: true };
+  }
+  return { success: false, error: 'Utilisateur introuvable lors de la mise à jour' };
+}
 
 function registerUser(p) {
   if (!p.email || !p.password || !p.name) {
@@ -639,5 +723,44 @@ function submitPayment(p, session) {
     return upgradeUser(p, session);
   } catch(err) {
     return { success: false, error: err.toString() };
+  }
+}
+
+// ─────────────────────────────────────────────
+// AUTOMATED BACKUPS
+// ─────────────────────────────────────────────
+
+/**
+ * Lancez cette fonction manuellement UNE SEULE FOIS depuis l'interface Google Apps Script
+ * pour activer les sauvegardes automatiques hebdomadaires.
+ */
+function setupWeeklyBackup() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'weeklyBackup') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  ScriptApp.newTrigger('weeklyBackup')
+    .timeBased()
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(3) // 3h du matin
+    .create();
+}
+
+function weeklyBackup() {
+  try {
+    var folderName = 'Confamily_Backups';
+    var iter = DriveApp.getFoldersByName(folderName);
+    var folder = iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
+    
+    var dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+    var backupName = "Confamily_DB_Backup_" + dateStr;
+    
+    var file = DriveApp.getFileById(SHEET_ID);
+    file.makeCopy(backupName, folder);
+  } catch(e) {
+    console.error("Backup failed: " + e.toString());
   }
 }

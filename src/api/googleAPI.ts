@@ -145,6 +145,14 @@ export async function logout() {
   clearSession();
 }
 
+export async function requestPasswordReset(email: string) {
+  return api({ action: 'requestPasswordReset', email });
+}
+
+export async function resetPassword(email: string, otp: string, newPassword: string) {
+  return api({ action: 'resetPassword', email, otp, newPassword });
+}
+
 export async function resolveInvite(code: string) {
   return api<InviteResolved>({ action: 'resolveInvite', code });
 }
