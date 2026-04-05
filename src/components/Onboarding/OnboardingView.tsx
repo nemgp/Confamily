@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useFamilyStore } from '../../store/familyStore';
 import { ChevronRight, TreePine, Check } from 'lucide-react';
 
 const steps = [
@@ -14,7 +15,33 @@ export function OnboardingView() {
   const [parentName1, setParentName1] = useState('');
   const [parentName2, setParentName2] = useState('');
   const { user } = useAuthStore();
+  const { addMemberRemote } = useFamilyStore();
+  const [isFinishing, setIsFinishing] = useState(false);
   const navigate = useNavigate();
+
+  const handleFinish = async () => {
+    setIsFinishing(true);
+    try {
+      const moiId = 'moi_' + Date.now();
+      const meParts = (user?.name || '').split(' ');
+      const fName = meParts[0] || 'Moi';
+      const lName = meParts.slice(1).join(' ') || '';
+
+      await addMemberRemote({ id: moiId, firstName: fName, lastName: lName, relation: 'moi', gender: 'M', isAlive: true, linkedUserId: user?.id }, '1', 'moi');
+
+      if (parentName1) {
+        const p1 = parentName1.split(' ');
+        await addMemberRemote({ id: 'p1_' + Date.now(), firstName: p1[0] || 'Parent 1', lastName: p1.slice(1).join(' ') || lName, relation: 'parent', gender: 'M', isAlive: true }, moiId, 'parent');
+      }
+      if (parentName2) {
+        const p2 = parentName2.split(' ');
+        await addMemberRemote({ id: 'p2_' + Date.now(), firstName: p2[0] || 'Parent 2', lastName: p2.slice(1).join(' ') || lName, relation: 'parent', gender: 'F', isAlive: true }, moiId, 'parent');
+      }
+    } catch(e) {
+      console.error(e);
+    }
+    navigate('/dashboard');
+  };
 
   const inviteLink = window.location.origin + window.location.pathname + '#/register';
   const shareWhatsApp = () => {
@@ -80,9 +107,9 @@ export function OnboardingView() {
 
         {/* Navigation */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
-          {step > 0 ? <button className="btn btn-ghost btn-sm" onClick={() => setStep(step - 1)}>Retour</button> : <div />}
-          <button className="btn btn-primary btn-sm" onClick={() => step < 2 ? setStep(step + 1) : navigate('/dashboard')}>
-            {step === 2 ? 'Accéder à mon arbre' : 'Continuer'} <ChevronRight size={16} />
+          {step > 0 ? <button className="btn btn-ghost btn-sm" onClick={() => setStep(step - 1)} disabled={isFinishing}>Retour</button> : <div />}
+          <button className="btn btn-primary btn-sm" onClick={() => step < 2 ? setStep(step + 1) : handleFinish()} disabled={isFinishing}>
+            {isFinishing ? 'Configuration...' : (step === 2 ? 'Accéder à mon arbre' : 'Continuer')} <ChevronRight size={16} />
           </button>
         </div>
       </div>

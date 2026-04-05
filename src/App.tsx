@@ -199,7 +199,7 @@ function DashboardPage() {
       )}
 
       {isEmpty ? (
-        <EmptyTreeState onAdd={() => openAddModal('enfant')} />
+        <EmptyTreeState onAdd={() => openAddModal('moi')} />
       ) : (
         <>
           {viewMode === 'tree' && (
@@ -214,7 +214,10 @@ function DashboardPage() {
           {/* FAB — icône seule sur mobile, texte complet sur desktop */}
           <button
             className="btn btn-primary fab-add-btn"
-            onClick={() => openAddModal('enfant')}
+            onClick={() => {
+               if (nodes.length === 0) openAddModal('moi');
+               else openAddModal('enfant');
+            }}
             title="Ajouter un membre"
           >
             <Plus size={20} />
