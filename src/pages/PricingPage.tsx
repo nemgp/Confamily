@@ -56,8 +56,16 @@ export function PricingPage() {
             boxShadow: p.highlight ? 'var(--shadow-glow)' : 'var(--shadow-xs)',
             opacity: p.isCurrent ? 0.8 : 1,
           }}>
-            {p.badge && <span className="badge badge-primary" style={{ position: 'absolute', top: '-12px', right: '20px' }}>{p.badge}</span>}
-            {p.isCurrent && <span className="badge badge-success" style={{ position: 'absolute', top: '-12px', left: '20px' }}>Plan actuel</span>}
+            {p.badge && (
+              <div style={{ position: 'absolute', top: '-14px', right: '20px', background: 'var(--bg)', padding: '0 4px' }}>
+                <span className="badge badge-primary">{p.badge}</span>
+              </div>
+            )}
+            {p.isCurrent && (
+              <div style={{ position: 'absolute', top: '-14px', left: '20px', background: 'var(--bg)', padding: '0 4px' }}>
+                <span className="badge badge-success">Plan actuel</span>
+              </div>
+            )}
             <h3 style={{ fontWeight: 700, fontSize: '1.2rem', marginBottom: '8px' }}>{p.name}</h3>
             <div style={{ marginBottom: '24px' }}>
               <span style={{ fontSize: '2.5rem', fontWeight: 900 }}>{p.price}€</span>
