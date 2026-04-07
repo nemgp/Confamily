@@ -6,14 +6,11 @@ import { ChevronRight, TreePine, Check } from 'lucide-react';
 
 const steps = [
   { title: 'Votre profil', subtitle: 'Commençons par vous' },
-  { title: 'Vos parents', subtitle: 'Ajoutez vos parents à l\'arbre' },
   { title: 'Invitations', subtitle: 'Invitez votre famille' },
 ];
 
 export function OnboardingView() {
   const [step, setStep] = useState(0);
-  const [parentName1, setParentName1] = useState('');
-  const [parentName2, setParentName2] = useState('');
   const { user } = useAuthStore();
   const { addMemberRemote } = useFamilyStore();
   const [isFinishing, setIsFinishing] = useState(false);
@@ -26,26 +23,7 @@ export function OnboardingView() {
       const meParts = (user?.name || '').split(' ');
       const fName = meParts[0] || 'Moi';
       const lName = meParts.slice(1).join(' ') || '';
-
       await addMemberRemote({ id: moiId, firstName: fName, lastName: lName, relation: 'moi', gender: 'M', isAlive: true, linkedUserId: user?.id }, '1', 'moi');
-
-      const p1Id = 'p1_' + Date.now();
-      const p2Id = 'p2_' + Date.now();
-
-      if (parentName1) {
-        const p1 = parentName1.split(' ');
-        await addMemberRemote({ id: p1Id, firstName: p1[0] || 'Parent 1', lastName: p1.slice(1).join(' ') || lName, relation: 'parent', gender: 'M', isAlive: true }, moiId, 'parent');
-      }
-      if (parentName2) {
-        const p2 = parentName2.split(' ');
-        await addMemberRemote({ id: p2Id, firstName: p2[0] || 'Parent 2', lastName: p2.slice(1).join(' ') || lName, relation: 'parent', gender: 'F', isAlive: true }, moiId, 'parent');
-      }
-
-      // Link parents together if both exist
-      if (parentName1 && parentName2) {
-        const { addRelation } = await import('../../api/googleAPI');
-        await addRelation(p1Id, p2Id, 'spouse');
-      }
     } catch(e) {
       console.error(e);
     }
@@ -86,22 +64,6 @@ export function OnboardingView() {
         )}
 
         {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div className="input-group">
-              <label>Nom du père</label>
-              <input className="input" value={parentName1} onChange={e => setParentName1(e.target.value)} placeholder="Prénom Nom" />
-            </div>
-            <div className="input-group">
-              <label>Nom de la mère</label>
-              <input className="input" value={parentName2} onChange={e => setParentName2(e.target.value)} placeholder="Prénom Nom" />
-            </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-              Vous pourrez ajouter plus de détails plus tard depuis l'arbre.
-            </p>
-          </div>
-        )}
-
-        {step === 2 && (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📱</div>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: 1.7 }}>
@@ -117,8 +79,8 @@ export function OnboardingView() {
         {/* Navigation */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
           {step > 0 ? <button className="btn btn-ghost btn-sm" onClick={() => setStep(step - 1)} disabled={isFinishing}>Retour</button> : <div />}
-          <button className="btn btn-primary btn-sm" onClick={() => step < 2 ? setStep(step + 1) : handleFinish()} disabled={isFinishing}>
-            {isFinishing ? 'Configuration...' : (step === 2 ? 'Accéder à mon arbre' : 'Continuer')} <ChevronRight size={16} />
+          <button className="btn btn-primary btn-sm" onClick={() => step < 1 ? setStep(step + 1) : handleFinish()} disabled={isFinishing}>
+            {isFinishing ? 'Configuration...' : (step === 1 ? 'Accéder à mon arbre' : 'Continuer')} <ChevronRight size={16} />
           </button>
         </div>
       </div>

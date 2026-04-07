@@ -143,8 +143,17 @@ export function MemberDetails() {
       )}
 
       {selectedMember.relation !== 'moi' && (
-        <button className="btn btn-ghost btn-sm" onClick={() => { removeMemberRemote(selectedMember.id); selectMember(null); }} style={{ marginTop: 'auto', color: 'var(--danger)' }}>
-          <Trash2 size={16} /> Retirer de l'arbre
+        <button
+          className="btn btn-outline btn-block"
+          style={{ marginTop: '16px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+          onClick={() => {
+            if (window.confirm(`Supprimer « ${selectedMember.firstName} ${selectedMember.lastName} » de l'arbre ? Cette action est irréversible.`)) {
+              removeMemberRemote(selectedMember.id);
+              selectMember(null);
+            }
+          }}
+        >
+          <Trash2 size={16} /> Supprimer ce profil
         </button>
       )}
     </div>
