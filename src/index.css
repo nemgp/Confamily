@@ -212,32 +212,84 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 6px 28px rgba(217,119,54,0.55);
 }
 
+/* ===== RESPONSIVE MOBILE ===== */
+
 @media (max-width: 768px) {
-  :root { --sidebar-width: 60px; }
-  .btn { padding: 12px 20px; font-size: 0.95rem; }
-  .btn-lg { padding: 14px 28px; font-size: 1rem; }
-  .modal { padding: 24px; width: 95%; }
+  :root { --sidebar-width: 64px; }
+
+  /* Boutons un peu plus grands pour le pouce */
+  .btn { padding: 13px 22px; font-size: 0.95rem; min-height: 48px; }
+  .btn-sm { padding: 11px 18px; font-size: 0.875rem; min-height: 44px; }
+  .btn-lg { padding: 16px 30px; font-size: 1.05rem; min-height: 52px; }
+  .btn-icon { width: 48px; height: 48px; }
+
+  .modal { padding: 24px 20px; width: 95%; }
   .hide-mobile { display: none !important; }
   .show-mobile { display: flex !important; }
-  /* FAB : icone seule sur mobile */
+
+  /* FAB : icône seule sur mobile */
   .fab-label { display: none !important; }
-  .fab-add-btn { padding: 16px; border-radius: 50%; width: 56px; height: 56px; bottom: 80px; }
+  .fab-add-btn {
+    width: 60px; height: 60px; padding: 0;
+    border-radius: 50%; bottom: 80px;
+    font-size: 0; /* hide text */
+  }
+  .fab-add-btn svg { width: 26px; height: 26px; }
+
+  /* Inputs plus hauts pour le toucher */
+  .input { padding: 14px 16px; font-size: 1rem; min-height: 52px; }
+
+  /* Sidebar plus large pour les icones */
+  .sidebar-link { width: 52px; height: 52px; border-radius: 14px; }
 }
 
 @media (max-width: 480px) {
-  .sidebar { width: 100%; height: 60px; flex-direction: row; padding: 0 16px;
+  /* Barre de navigation basse */
+  .sidebar {
+    width: 100%; height: 64px;
+    flex-direction: row; padding: 0 8px;
     border-right: none; border-top: 1px solid var(--border-light);
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    justify-content: space-around; gap: 0;
+  }
   .sidebar-logo { display: none; }
-  .sidebar-link { width: 40px; height: 40px; }
+  .sidebar-link {
+    width: 52px; height: 52px; border-radius: 12px;
+    flex-direction: column; font-size: 0.6rem; gap: 2px;
+  }
   .sidebar-link.active::before { display: none; }
-  .main-with-sidebar { padding-bottom: 60px; }
-  .member-details-drawer { width: 100% !important; border-left: none !important; border-top: 1px solid var(--border-light); }
-  .mobile-large-btn { width: 48px !important; height: 48px !important; }
-  /* FAB positionné juste au-dessus de la barre du bas */
-  .fab-add-btn { bottom: 76px; }
+
+  /* Espace pour la nav bar du bas */
+  .main-with-sidebar { padding-bottom: 68px; }
+
+  /* FAB positionné au-dessus de la barre du bas */
+  .fab-add-btn { bottom: 80px; }
+
+  /* Member details en bottom sheet sur mobile */
+  .member-details-drawer {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-light);
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  /* Boutons d'action dans les fiches membres */
+  .mobile-large-btn { width: 52px !important; height: 52px !important; }
+
   /* Fix overflow horizontal landing stats */
-  .landing-stats { flex-wrap: wrap !important; gap: 0 !important; }
+  .landing-stats { flex-wrap: wrap !important; gap: 8px !important; }
+
+  /* Modal full width sur très petit écran */
+  .modal { width: 100%; border-radius: 20px 20px 0 0; position: fixed; bottom: 0; margin: 0; max-height: 92vh; }
+  .modal-overlay { align-items: flex-end; }
+
+  /* Grille d'actions dans la fiche membre */
+  .add-options-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+
+  /* Boutons pleine largeur sur mobile pour les actions critiques */
+  .btn-block-mobile { width: 100% !important; }
 }
 
 /* ===== SCROLLBAR ===== */
