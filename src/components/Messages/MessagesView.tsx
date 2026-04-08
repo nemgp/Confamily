@@ -10,8 +10,8 @@ type Message = { id: string; from: string; content: string; time: string; mine: 
 
 const getAvatarUrl = (gender?: 'M' | 'F', photoUrl?: string) => {
   return photoUrl || (gender === 'F' 
-    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Maria&mouth=smile&hair=longHairStraight&backgroundColor=ffdfbf' 
-    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Robert&mouth=smile&facialHair=beardLight&backgroundColor=b6e3f4');
+    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Aisha&mouth=smile&top=dreads01&skinColor=brown&hairColor=black&backgroundColor=ffdfbf' 
+    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Jamal&mouth=smile&facialHair=beardMedium&top=shortCurly&skinColor=brown&hairColor=black&backgroundColor=b6e3f4');
 };
 
 export function MessagesView() {

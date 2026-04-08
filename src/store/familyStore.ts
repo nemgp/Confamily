@@ -49,6 +49,7 @@ interface FamilyState {
   selectedMember: FamilyMember | null;
   showAddModal: boolean;
   addRelationType: Relation | null;
+  addRefId: string | null;
   isSyncing: boolean;
   syncError: string | null;
   bridgeNodes: FamilyMember[]; // ghost nodes from other trees
@@ -57,7 +58,7 @@ interface FamilyState {
   addMember: (member: FamilyMember, refId: string, relType: Relation) => void;
   updateMember: (id: string, updates: Partial<FamilyMember>) => void;
   removeMember: (id: string) => void;
-  openAddModal: (relationType: Relation) => void;
+  openAddModal: (relationType: Relation, refId?: string) => void;
   closeAddModal: () => void;
   getParentsOf: (id: string) => string[];
   edgeCustomColors: Record<string, string>;
@@ -255,6 +256,7 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
   selectedMember: null,
   showAddModal: false,
   addRelationType: null,
+  addRefId: null,
   isSyncing: false,
   syncError: null,
   bridgeNodes: [],
@@ -413,8 +415,8 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
     };
   }),
 
-  openAddModal: (relationType: Relation) => set({ showAddModal: true, addRelationType: relationType }),
-  closeAddModal: () => set({ showAddModal: false, addRelationType: null }),
+  openAddModal: (relationType: Relation, refId?: string) => set({ showAddModal: true, addRelationType: relationType, addRefId: refId ?? null }),
+  closeAddModal: () => set({ showAddModal: false, addRelationType: null, addRefId: null }),
   edgeCustomColors: {},
   cycleEdgeColor: (edgeId: string) => set((state) => {
     const currentColor = state.edgeCustomColors[edgeId] || (edgeId.includes('spouse') ? EDGE_STYLE_HORIZONTAL.stroke : EDGE_STYLE_VERTICAL.stroke);

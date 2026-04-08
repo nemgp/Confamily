@@ -8,7 +8,7 @@ const relationLabels: Record<string, string> = {
 };
 
 export function AddMemberModal() {
-  const { showAddModal, addRelationType, closeAddModal, addMemberRemote, selectedMember, getParentsOf } = useFamilyStore();
+  const { showAddModal, addRelationType, addRefId, closeAddModal, addMemberRemote, getParentsOf } = useFamilyStore();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -18,20 +18,23 @@ export function AddMemberModal() {
   const [photoUrl, setPhotoUrl] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const nodes = useFamilyStore(s => s.nodes);
+  const refMember = nodes.find(n => n.id === addRefId)?.data ?? null;
+
   useEffect(() => {
     if (showAddModal) {
-      if (addRelationType === 'conjoint' && selectedMember?.gender) {
-        setGender(selectedMember.gender === 'M' ? 'F' : 'M');
+      if (addRelationType === 'conjoint' && refMember?.gender) {
+        setGender(refMember.gender === 'M' ? 'F' : 'M');
       } else {
         setGender('M');
       }
     }
-  }, [showAddModal, addRelationType, selectedMember]);
+  }, [showAddModal, addRelationType, refMember]);
 
   if (!showAddModal || !addRelationType) return null;
 
   // Validation: max 2 parents
-  const refId = selectedMember?.id || '1';
+  const refId = addRefId || '1';
   if (addRelationType === 'parent') {
     const existingParents = getParentsOf(refId);
     if (existingParents.length >= 2) {

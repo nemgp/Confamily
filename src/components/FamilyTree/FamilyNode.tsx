@@ -6,8 +6,8 @@ export function FamilyNode({ data }: { data: FamilyMember }) {
   const isMe = data.relation === 'moi';
   const genderColor = data.gender === 'F' ? '#e8a87c' : '#d97736';
   const avatarUrl = data.photoUrl || (data.gender === 'F'
-    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Maria&mouth=smile&hair=longHairStraight&backgroundColor=ffdfbf'
-    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Robert&mouth=smile&facialHair=beardLight&backgroundColor=b6e3f4');
+    ? 'https://api.dicebear.com/9.x/avataaars/svg?seed=Aisha&mouth=smile&top=dreads01&skinColor=brown&hairColor=black&backgroundColor=ffdfbf'
+    : 'https://api.dicebear.com/9.x/avataaars/svg?seed=Jamal&mouth=smile&facialHair=beardMedium&top=shortCurly&skinColor=brown&hairColor=black&backgroundColor=b6e3f4');
 
   return (
     <div style={{
@@ -72,9 +72,7 @@ export function FamilyNode({ data }: { data: FamilyMember }) {
         </div>
       )}
 
-      {data.isAlive === false && (
-        <div style={{ fontSize: '0.65rem', marginTop: '6px', opacity: 0.65, background: 'rgba(0,0,0,0.08)', borderRadius: '6px', padding: '2px 6px' }}>✝ Décédé(e)</div>
-      )}
+
 
       <Handle type="source" position={Position.Bottom} style={{ background: genderColor, border: '2px solid #fff', width: 10, height: 10 }} />
     </div>

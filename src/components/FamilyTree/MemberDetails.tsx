@@ -76,7 +76,7 @@ export function MemberDetails() {
         ) : (
           <>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '2px' }}>{selectedMember.firstName} {selectedMember.lastName}</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{selectedMember.gender === 'F' ? '♀' : '♂'} {selectedMember.isAlive ? 'En vie' : 'Décédé(e)'}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{selectedMember.gender === 'F' ? 'Femme' : 'Homme'}</p>
           </>
         )}
       </div>
@@ -117,7 +117,7 @@ export function MemberDetails() {
         <p style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Ajouter un lien :</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
           {addOptions.map(o => (
-            <button key={o.rel} className="btn btn-outline btn-sm" onClick={() => openAddModal(o.rel)}>
+            <button key={o.rel} className="btn btn-outline btn-sm" onClick={() => openAddModal(o.rel, selectedMember.id)}>
               <UserPlus size={14} /> {o.label}
             </button>
           ))}
