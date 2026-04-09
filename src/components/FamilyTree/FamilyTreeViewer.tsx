@@ -20,7 +20,7 @@ export function FamilyTreeViewer() {
         fitView
         minZoom={0.2}
         maxZoom={2}
-        defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
+        defaultEdgeOptions={{ type: 'smoothstep' }}
       >
         <Background color="var(--primary)" variant={BackgroundVariant.Dots} gap={30} size={1} />
         <Controls style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border-light)' }} />
