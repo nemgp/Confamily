@@ -283,6 +283,62 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
         fromId: r.fromId, toId: r.toId, type: r.type,
       }));
 
+      // Post-process to heal data missing from simplified backend schema
+      const inferredRelations: RelationLink[] = [];
+      const parentChildLookup = new Set<string>();
+      const spouseLookup = new Set<string>();
+
+      // Populate lookups
+      apiRelations.forEach(r => {
+        if (r.type === 'parent_child') parentChildLookup.add(`${r.fromId}-${r.toId}`);
+        if (r.type === 'spouse') {
+          spouseLookup.add(`${r.fromId}-${r.toId}`);
+          spouseLookup.add(`${r.toId}-${r.fromId}`);
+        }
+      });
+
+      // 1. Resolve siblings: hook them up to the same parents
+      apiRelations.forEach(r => {
+        if (r.type === 'sibling') {
+          // Both directions: if one has a parent, the other inherits it
+          const parentsOfFrom = apiRelations.filter(rel => rel.type === 'parent_child' && rel.toId === r.fromId).map(rel => rel.fromId);
+          const parentsOfTo = apiRelations.filter(rel => rel.type === 'parent_child' && rel.toId === r.toId).map(rel => rel.fromId);
+          
+          parentsOfFrom.forEach(p => {
+            if (!parentChildLookup.has(`${p}-${r.toId}`)) {
+              inferredRelations.push({ fromId: p, toId: r.toId, type: 'parent_child' });
+              parentChildLookup.add(`${p}-${r.toId}`);
+            }
+          });
+          parentsOfTo.forEach(p => {
+            if (!parentChildLookup.has(`${p}-${r.fromId}`)) {
+              inferredRelations.push({ fromId: p, toId: r.fromId, type: 'parent_child' });
+              parentChildLookup.add(`${p}-${r.fromId}`);
+            }
+          });
+        }
+      });
+
+      // 2. Resolve spouses: two parents of the same child are spouses
+      const childrenIds = new Set(apiRelations.map(r => r.toId));
+      childrenIds.forEach(childId => {
+        const parents = [...apiRelations, ...inferredRelations]
+          .filter(r => r.type === 'parent_child' && r.toId === childId)
+          .map(r => r.fromId);
+        
+        if (parents.length >= 2) {
+          const p1 = parents[0];
+          const p2 = parents[1];
+          if (!spouseLookup.has(`${p1}-${p2}`)) {
+            inferredRelations.push({ fromId: p1, toId: p2, type: 'spouse' });
+            spouseLookup.add(`${p1}-${p2}`);
+            spouseLookup.add(`${p2}-${p1}`);
+          }
+        }
+      });
+
+      const fullRelations = [...apiRelations, ...inferredRelations];
+
       // Bridge ghost nodes
       const bridgeNodes: FamilyMember[] = (res.bridges || []).map((b: API.Member) => ({
         id: b.id, firstName: b.firstName, lastName: b.lastName,
@@ -293,11 +349,11 @@ export const useFamilyStore = create<FamilyState>((set, get) => ({
       } as FamilyMember & { isBridge: boolean; linkedToLocalMember?: string }));
 
       const apiNodes: TreeNode[] = apiMembers.map(m => ({ id: m.id, position: { x: 0, y: 0 }, data: m, type: 'familyNode' }));
-      const result = layoutTree(apiNodes, apiRelations, get().edgeCustomColors);
+      const result = layoutTree(apiNodes, fullRelations, get().edgeCustomColors);
 
       set({
         nodes: result.nodes, edges: result.edges,
-        relations: apiRelations, bridgeNodes, isSyncing: false,
+        relations: fullRelations, bridgeNodes, isSyncing: false,
       });
     } catch (e: unknown) {
       // If API not configured, silently use local mock data
